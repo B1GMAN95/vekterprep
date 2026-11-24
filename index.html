@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VekterPrep</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{
+/* VekterPrep: uniformsblå aksent, kjølige nøytraler, én kolonne, bunnmeny */
+--bg:#f4f5f7;--bg2:#fff;--bg3:#e9ecf1;--tx:#181b24;--tx2:#575d6c;--txI:#fff;
+--ac:#2148c9;--acS:#e5ebfa;--acH:#18379e;--ok:#12813a;--okS:#d9f5e3;
+--wn:#b4530a;--wnS:#fdeedd;--err:#c22020;--errS:#fbe2e2;
+--bd:#d0d5de;--r:10px;--rL:14px;--sh:0 1px 3px rgba(0,0,0,.06);
+--f:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+--bg:#0e1016;--bg2:#181c27;--bg3:#232838;--tx:#e3e6ec;--tx2:#9096a6;--txI:#0e1016;
+--ac:#7396f5;--acS:#1b2543;--acH:#94b0ff;--ok:#4fd684;--okS:#12291c;
+--wn:#f5a04c;--wnS:#2a1c0d;--err:#f58080;--errS:#2c1414;
+--bd:#2d3243;--sh:0 1px 3px rgba(0,0,0,.25);color-scheme:dark}}
+:root[data-theme="dark"]{
+--bg:#0e1016;--bg2:#181c27;--bg3:#232838;--tx:#e3e6ec;--tx2:#9096a6;--txI:#0e1016;
+--ac:#7396f5;--acS:#1b2543;--acH:#94b0ff;--ok:#4fd684;--okS:#12291c;
+--wn:#f5a04c;--wnS:#2a1c0d;--err:#f58080;--errS:#2c1414;
+--bd:#2d3243;--sh:0 1px 3px rgba(0,0,0,.25);color-scheme:dark}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--f);background:var(--bg);color:var(--tx);line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit}
+input,select,textarea{font-family:inherit;color:inherit}
+a{color:var(--ac)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+ul,ol{padding-left:20px;margin:6px 0 10px}li{margin-bottom:4px;font-size:14px}
+p{font-size:14px}
+.app{display:flex;flex-direction:column;height:100%}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;background:var(--bg2);border-bottom:1px solid var(--bd)}
+.top .lg{font-size:17px;font-weight:700;color:var(--ac);letter-spacing:-.01em}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:16px;background:var(--bg3);font-size:12px;font-weight:600}
+.main{flex:1;overflow-y:auto;padding:18px 16px 28px}
+.nav{display:flex;justify-content:space-around;background:var(--bg2);border-top:1px solid var(--bd);padding:4px 2px 6px}
+.ni{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 4px;min-width:44px;border-radius:8px;font-size:10px;font-weight:600;color:var(--tx2)}
+.ni.on{color:var(--ac)}.ni svg{width:20px;height:20px}
+.sec{display:none;max-width:640px;margin:0 auto}.sec.on{display:block}
+.cd{background:var(--bg2);border-radius:var(--rL);padding:16px;box-shadow:var(--sh);margin-bottom:12px}
+.cd h2{margin-bottom:8px}.cd h3{margin:12px 0 4px}.cd h3:first-child{margin-top:0}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:var(--r);font-weight:600;font-size:14px}
+.bp{background:var(--ac);color:var(--txI)}.bp:hover{background:var(--acH)}
+.bo{border:1.5px solid var(--bd);padding:9px 16px}.bo:hover{border-color:var(--ac);color:var(--ac)}
+.bs{padding:7px 13px;font-size:13px;border-radius:8px}.bw{width:100%}
+.bok{background:var(--ok);color:var(--txI)}.berr{background:var(--err);color:var(--txI)}
+.btn[disabled]{opacity:.5;cursor:default}
+.bg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:14px;font-size:11px;font-weight:700}
+.bgA{background:var(--acS);color:var(--ac)}.bgO{background:var(--okS);color:var(--ok)}.bgW{background:var(--wnS);color:var(--wn)}.bgE{background:var(--errS);color:var(--err)}
+.pb{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.pf{height:100%;background:var(--ac);border-radius:4px;transition:width .3s}
+h1{font-size:23px;font-weight:700;line-height:1.2;text-wrap:balance}
+h2{font-size:18px;font-weight:700;line-height:1.25}h3{font-size:15px;font-weight:700}
+.sub{color:var(--tx2);font-size:13px;margin-top:3px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.jb{justify-content:space-between}
+.mt6{margin-top:6px}.mt10{margin-top:10px}.mt14{margin-top:14px}.mb6{margin-bottom:6px}.mb10{margin-bottom:10px}.mb14{margin-bottom:14px}
+.sm{font-size:12px}.mu{color:var(--tx2)}.num{font-variant-numeric:tabular-nums}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:var(--tx2)}
+.fg input,.fg select,textarea{width:100%;padding:10px 12px;border:1.5px solid var(--bd);border-radius:var(--r);background:var(--bg2);font-size:14px}
+textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
+.obw{max-width:360px;margin:0 auto;padding:28px 4px}
+.obw .lg{font-size:32px;font-weight:700;color:var(--ac);letter-spacing:-.02em}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st{padding:13px;border-radius:var(--r);background:var(--bg2);box-shadow:var(--sh)}
+.st .n{font-size:24px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.st .l{font-size:11px;color:var(--tx2);font-weight:600;margin-top:2px}
+.ti{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:12px 13px;border-radius:var(--r);border:1px solid var(--bd);background:var(--bg2);margin-bottom:7px}
+.ti:hover{border-color:var(--ac)}
+.mono{width:36px;height:36px;border-radius:9px;background:var(--acS);color:var(--ac);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.tii{flex:1;min-width:0}.tn{font-weight:700;font-size:14px}.td{font-size:12px;color:var(--tx2)}
+.ob{display:block;width:100%;text-align:left;padding:12px 13px;border:1.5px solid var(--bd);border-radius:var(--r);margin-bottom:7px;font-size:14px;line-height:1.4;background:var(--bg2)}
+.ob:hover{border-color:var(--ac)}.ob.ok{border-color:var(--ok);background:var(--okS)}.ob.no{border-color:var(--err);background:var(--errS)}.ob.dim{opacity:.5}
+.ob[disabled]{cursor:default}
+.cb{background:var(--acS);border-left:3px solid var(--ac);border-radius:0 var(--r) var(--r) 0;padding:13px;margin:8px 0 12px;font-size:14px}
+.exb{border-radius:var(--r);padding:12px 13px;margin-top:10px;font-size:14px}.exb.g{background:var(--okS)}.exb.r{background:var(--errS)}.exb.n{background:var(--bg3)}
+.tp{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.pill{padding:6px 13px;border-radius:16px;font-size:12px;font-weight:700;white-space:nowrap;border:1.5px solid var(--bd);color:var(--tx2);background:var(--bg2)}
+.pill.on{background:var(--ac);color:var(--txI);border-color:var(--ac)}
+.fcard{width:100%;text-align:center;min-height:190px;border-radius:var(--rL);padding:22px 18px;background:var(--bg2);border:2px solid var(--ac);box-shadow:var(--sh);display:flex;flex-direction:column;justify-content:center;gap:10px}
+.fcard .q{font-size:18px;font-weight:700;line-height:1.3;text-wrap:balance}
+.fcard .a{font-size:15px;line-height:1.55;border-top:1px solid var(--bd);padding-top:12px;text-align:left}
+.timer{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ac)}.timer.w{color:var(--wn)}.timer.c{color:var(--err)}
+.gl{padding:11px 0;border-bottom:1px solid var(--bd)}.gl:last-child{border-bottom:none}
+.glt{font-weight:700;font-size:14px}.gld{font-size:13px;color:var(--tx2);margin-top:2px}
+.ai{border-bottom:1px solid var(--bd)}
+.ab{width:100%;text-align:left;padding:12px 0;font-size:14px;font-weight:700;display:flex;justify-content:space-between;gap:10px}
+.ab::after{content:'+';color:var(--tx2)}.ai.op .ab::after{content:'\2212'}
+.acc{display:none;padding:0 0 12px;font-size:14px}.ai.op .acc{display:block}
+.km{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);font-size:14px;align-items:flex-start;width:100%;text-align:left}
+.kb{width:20px;height:20px;border-radius:5px;border:2px solid var(--bd);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.km.dn .kb{background:var(--ok);border-color:var(--ok);color:var(--txI)}
+.chk{display:flex;gap:9px;align-items:flex-start;padding:7px 0;font-size:14px;cursor:pointer}
+.chk input{width:18px;height:18px;margin-top:2px;flex-shrink:0}
+.big{font-size:54px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.sbar{margin-bottom:10px}.sbl{font-size:13px;font-weight:600;display:flex;justify-content:space-between;margin-bottom:3px}
+.note{font-size:12px;color:var(--tx2);border-left:3px solid var(--bd);padding-left:10px;margin-top:10px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}.tbl td,.tbl th{border:1px solid var(--bd);padding:6px 8px;text-align:left}
+@media(max-width:420px){h1{font-size:20px}.main{padding:14px 12px 24px}.ni{font-size:9px;min-width:40px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="auth" class="main" style="display:none">
+<div class="obw">
+  <div class="lg">VekterPrep</div>
+  <p class="sub mb14">Øving til eksamen og fagprøve i sikkerhetsfaget, og til vekterkurset.</p>
+  <h2 class="mb10" id="aTitle">Logg inn</h2>
+  <form onsubmit="event.preventDefault();doAuth()">
+  <div class="fg" id="aEw"><label for="aE">E-post</label><input id="aE" type="email" autocomplete="email"></div>
+  <div class="fg" id="aPw"><label for="aP" id="aPl">Passord</label><input id="aP" type="password" autocomplete="current-password"></div>
+  <p id="aMsg" class="sm mb10"></p>
+  <button class="btn bp bw" id="aBtn" type="submit">Logg inn</button>
+  </form>
+  <div class="row mt14" id="aLinks"></div>
+  <p class="sm mu mt14">Ved å opprette konto godtar du <a href="#" onclick="event.preventDefault();document.getElementById('aTerms').style.display=''">vilkårene og personvernerklæringen</a>.</p>
+  <div id="aTerms" class="sm mu mt10" style="display:none">VekterPrep er et øvingsverktøy i testfase. Fagstoffet er skrevet av en AI og ikke godkjent av en faglærer, og ingen kan love at du består. Vi lagrer e-postadressen din, profilen du fyller ut og framgangen din hos Supabase på servere i Europa. Opplysningene selges ikke og deles ikke med arbeidsgiver. Full tekst finner du under Mer når du er logget inn.</div>
+</div>
+</div>
+
+<div id="onb" class="main" style="display:none">
+<div class="obw">
+  <div class="lg">VekterPrep</div>
+  <p class="sub mb14">Øving til eksamen og fagprøve i sikkerhetsfaget, og til vekterkurset.</p>
+  <div class="fg"><label for="iN">Navnet ditt</label><input id="iN" autocomplete="given-name" placeholder="Fornavn"></div>
+  <div class="fg"><label for="iW">Type arbeidssted</label><select id="iW"></select></div>
+  <div class="fg"><label for="iS">Navn på arbeidsstedet (valgfritt)</label><input id="iS" placeholder="F.eks. Ski Storsenter"></div>
+  <div class="fg"><label for="iG">Hva øver du til?</label><select id="iG"><option value="eksamen">Skriftlig eksamen, vg3 sikkerhetsfaget</option><option value="fagprove">Fagprøven</option><option value="begge">Eksamen og fagprøve</option><option value="grunn">Vekterutdanningen (grunnkurs)</option></select></div>
+  <p id="oErr" class="sm" style="color:var(--err)"></p>
+  <button class="btn bp bw mt6" onclick="boot()">Kom i gang</button>
+  
+</div>
+</div>
+
+<div id="shell" style="display:none;flex-direction:column;height:100%">
+<div class="top"><div class="lg">VekterPrep</div><div class="row"><span class="chip num" id="strk">0 dager på rad</span><button class="chip" onclick="go('mer')" id="uBtn">Profil</button></div></div>
+<div class="main" id="ms">
+
+<section class="sec on" id="s-hjem">
+  <h1 id="greet">Hei</h1><p class="sub mb14" id="gsub"></p>
+  <div class="sg mb14">
+    <div class="st"><div class="n" id="xA">0</div><div class="l">Flervalg besvart</div></div>
+    <div class="st"><div class="n" id="xP">–</div><div class="l">Riktig, siste 60</div></div>
+    <div class="st"><div class="n" id="xK">0</div><div class="l">Kort du har klart</div></div>
+    <div class="st"><div class="n" id="xD">0</div><div class="l">Kort til repetisjon i dag</div></div>
+  </div>
+  <div class="cd"><h3>Neste steg</h3><p class="mu mb10" id="rec"></p><div class="row"><button class="btn bp bs" onclick="go('exam')">Eksamen</button><button class="btn bo bs" onclick="go('kort')">Flashcards</button><button class="btn bo bs" onclick="go('score')">Er jeg klar?</button></div></div>
+  <div class="cd"><h3>Svake temaer</h3><div id="weak" class="row mt6"></div></div>
+  <div class="cd"><h3>Siste øvinger</h3><div id="hist" class="mt6"></div></div>
+</section>
+
+<section class="sec" id="s-lar">
+  <div id="lList"><h1>Lær</h1><p class="sub mb14">Fagstoffet, tema for tema</p><div id="lTop"></div></div>
+  <div id="lDet" style="display:none"><button class="btn bo bs mb10" onclick="clT()">Tilbake</button><div id="lCt"></div></div>
+</section>
+
+<section class="sec" id="s-exam">
+  <div id="eSet">
+    <h1>Eksamenssimulator</h1><p class="sub mb14">Flervalg rettes automatisk. Caseoppgaver skriver du selv og får vurdert.</p>
+    <div class="cd">
+      <div class="fg"><label for="eTyp">Type</label><select id="eTyp"><option value="mixed">Blandet: flervalg + case</option><option value="multi">Bare flervalg</option><option value="case">Bare caseoppgaver</option></select></div>
+      <div class="fg"><label for="eCnt">Antall oppgaver</label><select id="eCnt"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="40">40</option></select></div>
+      <div class="fg"><label for="eTpc">Tema for flervalg</label><select id="eTpc"></select></div>
+      <div class="fg"><label for="eW">Arbeidssted i caseoppgavene</label><select id="eW"></select></div>
+      <div class="fg"><label for="eS">Navn på stedet (valgfritt)</label><input id="eS" placeholder="F.eks. Ski Storsenter"></div>
+      <div class="fg"><label for="eTim">Tidsbegrensning</label><select id="eTim"><option value="0">Ingen</option><option value="30">30 minutter</option><option value="60">60 minutter</option><option value="120">120 minutter</option></select></div>
+      <button class="btn bp bw" onclick="startE()">Start</button><p class="sm mu mt6" id="eMsg"></p>
+    </div>
+    <div class="cd" id="aiCaseBox" style="display:none"><h3>Egen case fra AI</h3><p class="mu mb10">Skriv hva slags sted og situasjon du vil øve på. AI lager en ny case og vurderer svaret ditt.</p>
+      <div class="fg"><label for="aiW">Sted og situasjon</label><input id="aiW" placeholder="F.eks. nattevakt på Ski Storsenter, innbruddsalarm i en butikk"></div>
+      <button class="btn bo bw" id="aiCaseBtn" onclick="aiCase()">Lag case</button><p class="sm mu mt6" id="aiCaseMsg"></p></div>
+  </div>
+  <div id="eAct" style="display:none">
+    <div class="row jb mb10"><div class="row"><span class="bg bgA num" id="ePrg">1/10</span><span class="timer" id="eTmr"></span></div><button class="btn bo bs" onclick="endE()">Avslutt</button></div>
+    <div id="eQ"></div>
+  </div>
+  <div id="eRes" style="display:none"></div>
+</section>
+
+<section class="sec" id="s-kort">
+  <h1>Flashcards</h1><p class="sub mb14">Si svaret høyt før du snur. Kort du bommer på kommer igjen i samme økt. Kort du kan, kommer tilbake etter 1, 2, 3, 5 og 8 dager.</p>
+  <div class="fg"><label for="fDeck">Kortstokk</label><select id="fDeck" onchange="srStart()"></select></div>
+  <p class="sm mu num mb6" id="fCnt"></p>
+  <div class="pb mb14"><div class="pf" id="fPb" style="width:0%"></div></div>
+  <div id="fBox"></div>
+</section>
+
+<section class="sec" id="s-score">
+  <h1>Er jeg klar?</h1><p class="sub mb14">Regnet ut fra det du har gjort her. Streng med vilje.</p>
+  <div id="scC"></div>
+</section>
+
+<section class="sec" id="s-ordbok">
+  <h1>Fagordbok</h1><p class="sub mb10" id="glSub"></p>
+  <div class="fg"><label for="glS">Søk</label><input id="glS" placeholder="Søk i ord og forklaringer" oninput="rGL()"></div>
+  <div class="tp mb10" id="glCat"></div>
+  <div class="cd" id="glL"></div>
+</section>
+
+<section class="sec" id="s-mer">
+  <h1>Mer</h1><p class="sub mb14">Oppslag, fagprøve, kompetansemål og profil</p>
+  <button class="ti" onclick="go('opps')"><span class="mono">OP</span><span class="tii"><span class="tn">Oppslagsverk</span><br><span class="td">Paragrafer, nødnumre og huskelister på ett sted</span></span></button>
+  <button class="ti" onclick="go('fagp')"><span class="mono">FP</span><span class="tii"><span class="tn">Fagprøveguide</span><br><span class="td">De fire delene og hva prøvenemnda ser etter</span></span></button>
+  <button class="ti" onclick="go('komp')"><span class="mono">KM</span><span class="tii"><span class="tn">Kompetansemål</span><br><span class="td">Læreplanen SIK03-02, huk av det du kan</span></span></button>
+  <button class="ti" onclick="go('vilkar')"><span class="mono">PV</span><span class="tii"><span class="tn">Personvern og vilkår</span><br><span class="td">Hva som lagres, hvor, og hva du kan forvente</span></span></button>
+  <div class="cd mt14"><h3>Profil</h3><p class="mu" id="pInfo"></p><p class="sm mu mt6" id="stInfo"></p><div class="row mt10"><button class="btn bo bs" onclick="editProfile()">Endre profil</button><button class="btn bo bs" onclick="logout()">Logg ut</button></div></div>
+  <div class="cd" id="upBox" style="display:none"><h3>Gratis og Pro</h3><p class="mu">Gratis gir Lær, ordbok, oppslag, kjernekortene og 10 flervalg per dag. Pro gir alle flervalg, caseoppgaver, alle kort og «Er jeg klar?». Pro er ikke i salg ennå. Ta kontakt med Hossen hvis du vil ha tilgang.</p></div>
+  <div class="cd" id="admBox" style="display:none"><h3>Admin</h3><p class="mu mb10">Gi tilgang til en e-postadresse. Har personen konto fra før, endres planen med en gang. Hvis ikke, får personen planen når hun registrerer seg med den adressen.</p>
+    <div class="fg"><label for="adE">E-post</label><input id="adE" type="email"></div>
+    <div class="fg"><label for="adP">Plan</label><select id="adP"><option value="livstid">Livstid</option><option value="pro">Pro</option><option value="gratis">Gratis</option></select></div>
+    <button class="btn bp bs" onclick="admAdd()">Gi tilgang</button><p class="sm mu mt6" id="adMsg"></p>
+    <h3>Brukere</h3><div id="adU"></div><h3>Ventende invitasjoner</h3><div id="adI"></div></div>
+  <div class="cd"><h3>Nullstill framgang</h3><p class="mu mb10">Sletter alle svar, kort og resultater.</p><button class="btn bo bs" id="rstBtn" onclick="resetP()">Nullstill</button></div>
+  <div class="cd"><h3>Om innholdet</h3><p class="mu">Fagstoffet er skrevet av en AI og kontrollert mot lovtekst og offentlige kilder der det var mulig. Det er ikke godkjent av en faglærer. Lover endres. Sjekk Lovdata og læreplanen på udir.no, og bruk kursmateriellet ditt som fasit hvis noe ikke stemmer overens.</p></div>
+</section>
+
+<section class="sec" id="s-vilkar"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Personvern og vilkår</h1><p class="sub mb10">Gjelder testversjonen. Sist oppdatert 24. november 2026.</p>
+<div class="cd"><h2>Personvern</h2>
+<h3>Hvem står bak</h3><p>VekterPrep er et privat prosjekt i testfase, drevet av Hossen Hansen, som er ansvarlig for opplysningene.</p>
+<h3>Hva som lagres</h3><ul><li>E-postadressen du registrerer deg med, og passordet ditt i kryptert form</li><li>Fornavn, type arbeidssted, navn på arbeidsstedet hvis du oppgir det, og hva du øver til</li><li>Framgangen din: svar på flervalg, resultater på caseoppgaver, flashcards, leste temaer og avhukede kompetansemål</li><li>Hvilken plan du har</li></ul><p>Tekstene du skriver i caseoppgaver blir ikke lagret.</p>
+<h3>Hvor det lagres</h3><p>Hos databaseleverandøren Supabase, på servere i Europa, og en kopi av framgangen i nettleseren din. Nettsiden leveres av Vercel, som ser tekniske opplysninger som IP-adresse når siden lastes.</p>
+<h3>Hvem som ser det</h3><p>Du ser dine egne opplysninger. Administrator ser navn, e-post og plan for å kunne gi tilgang, men åpner ikke framgangen din uten grunn. Opplysningene selges ikke, brukes ikke til reklame og deles ikke med arbeidsgiveren din.</p>
+<h3>Sletting og rettighetene dine</h3><p>«Nullstill framgang» sletter framgangen. Vil du slette hele kontoen, ta kontakt med administrator. Etter personvernreglene har du rett til innsyn, retting og sletting, og du kan klage til Datatilsynet.</p></div>
+<div class="cd"><h2>Vilkår for bruk</h2>
+<ul><li>VekterPrep er et øvingsverktøy. Det erstatter ikke godkjent vekterutdanning, læreplanen eller kursmateriellet ditt.</li><li>Fagstoffet er skrevet av en AI og kontrollert mot offentlige kilder, men er ikke godkjent av en faglærer. Det kan inneholde feil, og lover endres. Er det forskjell mellom appen og kursmateriellet eller Lovdata, er det appen som tar feil.</li><li>Innholdet er ikke juridisk rådgivning. I en virkelig situasjon gjelder loven, tjenesteinstruksen og beskjed fra politiet.</li><li>«Er jeg klar?»-tallet er veiledende. Ingen kan love deg at du består.</li><li>Tjenesten er i testfase, er gratis, og kan endres eller tas ned uten varsel. Framgang kan gå tapt.</li><li>Ikke kopier eller selg innholdet videre uten avtale.</li></ul>
+<p class="note">Teksten er et utkast laget for testversjonen. Før tjenesten selges, må den gjennomgås av en jurist og utvides med firmaopplysninger, betalingsvilkår, angrerett og avtaler med underleverandører.</p></div></section>
+
+<section class="sec" id="s-opps"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Oppslagsverk</h1><p class="sub mb10">Kortversjonen</p><div class="cd" id="csC"></div></section>
+<section class="sec" id="s-fagp"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Fagprøveguide</h1><p class="sub mb10">Den praktiske prøven</p><div id="fpC"></div></section>
+<section class="sec" id="s-komp"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Kompetansemål</h1><p class="sub mb10">Forkortet gjengivelse av målene i SIK03-02. Ordlyden står på <a href="https://www.udir.no/lk20/sik03-02">udir.no</a>.</p><div class="pb mb6"><div class="pf" id="kmPb" style="width:0%"></div></div><p class="sm mu num mb10" id="kmCt"></p><div class="cd" id="kmL"></div></section>
+
+</div>
+<nav class="nav" id="nav"></nav>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="q2.js"></script>
+<script>
+/* ---------- lagring ---------- */
+var LS='vp4_';
+function lsGet(k,d){try{var v=localStorage.getItem(LS+k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}}
+var SB_URL='https://owfbvlqwdeaepyxmypcs.supabase.co',SB_KEY='sb_publishable_vNna_F3t5OwWEN6Hyx--Fw_-6mJyR30';
+var SB=window.supabase.createClient(SB_URL,SB_KEY);
+var U=null,UID=null,EMAIL='';
+function freshP(){return{ans:[],ts:{},cases:[],sr:{},td:[],km:[],hist:[],qs:{},day:{d:0,n:0},str:0,ld:'',upd:0}}
+var P=freshP();
+var svTimer=null,svBusy=false,svDirty=false,STORE='konto';
+function save(){P.upd=Date.now();if(UID)lsSet('p_'+UID,P);svDirty=true;if(!svTimer&&!svBusy)svTimer=setTimeout(flush,1500)}
+function flush(){svTimer=null;if(!UID||!svDirty||svBusy)return;svDirty=false;svBusy=true;
+  SB.from('progress').upsert({user_id:UID,data:P,upd:P.upd}).then(function(r){svBusy=false;STORE=r.error?'feil':'konto';stInfo();
+    if(r.error){svDirty=true;svTimer=setTimeout(flush,10000)}else if(svDirty)svTimer=setTimeout(flush,1500)},function(){svBusy=false;svDirty=true;STORE='feil';stInfo();svTimer=setTimeout(flush,10000)})}
+function stInfo(){var el=document.getElementById('stInfo');if(el)el.textContent=STORE==='konto'?'Framgangen lagres på kontoen din og følger deg mellom enheter.':'Får ikke kontakt med serveren akkurat nå. Framgangen ligger i denne nettleseren og lastes opp når forbindelsen er tilbake.'}
+function pro(){return !!U&&(U.admin||U.plan==='pro'||U.plan==='livstid')}
+function dayN(){var t=today();if(!P.day||P.day.d!==t)P.day={d:t,n:0};return P.day.n}
+function show(v){['auth','onb','shell'].forEach(function(x){document.getElementById(x).style.display=x===v?(x==='shell'?'flex':''):'none'})}
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t}return a}
+function today(){var d=new Date();d.setHours(0,0,0,0);return Math.round(d.getTime()/864e5)}
+
+/* ---------- faste data ---------- */
+var WP={kjopesenter:['Kjøpesenter','kjøpesenteret'],sykehus:['Sykehus / helseinstitusjon','sykehuset'],kontor:['Kontorbygg / resepsjon','kontorbygget'],event:['Arrangement / uteliv','arrangementet'],industri:['Industri / lager / byggeplass','anlegget'],mobil:['Mobilt vakthold / patrulje','ruten din'],transport:['Flyplass / kollektivtransport','terminalen'],skole:['Skole / campus','skolen'],annet:['Annet','objektet']};
+var TN={juss:'Juss',risiko:'Risikovurdering',beredskap:'Beredskap',brann:'Brannvern',hms:'HMS',konflikt:'Konflikthåndtering',forstehjelp:'Førstehjelp',service:'Service og rapport'};
+
+/* Faktaark som også sendes til AI, slik at den vurderer mot samme regler som appen lærer bort */
+var FACTS='Vektere har ikke politimyndighet og har samme rettigheter som alle andre. Straffeloven § 17 nødrett: handling for å redde liv, helse, eiendom eller annen interesse fra fare som ikke kan avverges på annen rimelig måte, når skaderisikoen er langt større enn skaderisikoen ved handlingen. § 18 nødverge: avverge et ulovlig angrep, ikke gå lenger enn nødvendig, ikke åpenbart uforsvarlig. § 19 selvtekt: den som har retten gjenoppretter en ulovlig endret tilstand når det er urimelig å vente på myndighetenes bistand; makt mot person bare når rettskrenkelsen er åpenbar. Straffeprosessloven § 176: enhver kan pågripe den som treffes eller forfølges på fersk gjerning eller ferske spor, og skal straks overgi den pågrepne til politiet; vilkårene i §§ 171-173 må være oppfylt (hovedregel: skjellig grunn til mistanke om handling med høyere straff enn fengsel i 6 måneder; § 173: den som treffes på fersk gjerning og ikke avstår kan pågripes uansett strafferamme). § 178: pågripelse skal skje så skånsomt som forholdene tilsier. Bortvisning bygger på eiers råderett over eiendommen. Minste inngreps prinsipp: dialog og tilstedeværelse først, makt bare med hjemmel. Nødnumre: 110 brann, 112 politi, 113 medisinsk nødhjelp. Brann: redde, varsle, slokke. Førstehjelp: bevisstløs som puster normalt legges i sideleie; puster ikke normalt: ring 113, HLR 30:2 og hjertestarter. Arbeidsmiljøloven: alle virksomheter skal ha verneombud (færre enn 5 arbeidstakere kan avtale annen ordning), arbeidsmiljøutvalg fra 30 arbeidstakere. Avvik skal meldes, rettes og forebygges. Rapport: hvem, hva, hvor, når, hvordan, vitner; saklig, skill observasjon fra vurdering.';
+
+var T=[
+{id:'juss',mo:'JU',ds:'Nødrett, nødverge, selvtekt, pågripelse, vaktvirksomhetsloven',ct:
+'<h2>Juss for vektere</h2><p>Det viktigste først: en vekter har <strong>ikke politimyndighet</strong>. Du har de samme rettighetene som alle andre, pluss det eieren av stedet har gitt deg lov til å gjøre på sine vegne.</p>'+
+'<h3>Straffeloven § 17: nødrett</h3><p>En handling som ellers er straffbar, er lovlig når den</p><ul><li>blir gjort for å redde liv, helse, eiendom eller en annen interesse fra en fare for skade som ikke kan avverges på annen rimelig måte, og</li><li>skaderisikoen er langt større enn skaderisikoen ved handlingen.</li></ul><p>Eksempel: du knuser en bilrute for å få ut et barn som er innelåst i sterk varme.</p>'+
+'<h3>Straffeloven § 18: nødverge</h3><p>En handling som ellers er straffbar, er lovlig når den</p><ul><li>blir gjort for å avverge et <strong>ulovlig angrep</strong>,</li><li>ikke går lenger enn nødvendig, og</li><li>ikke går åpenbart ut over det som er forsvarlig.</li></ul><p>Eksempel: en person slår etter deg, og du holder armene hans fast til angrepet er over. Når angrepet er over, er nødvergeretten også over.</p>'+
+'<h3>Straffeloven § 19: selvtekt</h3><p>Den som har retten, kan gjenopprette en ulovlig endret tilstand når det ville være urimelig å måtte vente på hjelp fra myndighetene. Makt mot en person kan bare brukes når rettskrenkelsen er åpenbar, og ikke lenger enn forsvarlig.</p><p>Eksempel: en kunde går ut med en vare han ikke har betalt for, og du tar varen tilbake med en gang.</p>'+
+'<h3>Pågripelse av private («borgerarrest»)</h3><p>Straffeprosessloven § 176: Når den mistenkte treffes eller forfølges på <strong>fersk gjerning eller ferske spor</strong>, kan pågripelse foretas av enhver. Den som pågriper uten å være politi, skal <strong>straks</strong> overgi den pågrepne til politiet.</p><ul><li>De vanlige vilkårene for pågripelse må være oppfylt (§§ 171 til 173). Hovedregelen er skjellig grunn til mistanke om en handling som kan gi høyere straff enn fengsel i 6 måneder.</li><li>§ 173: den som treffes på fersk gjerning og ikke avstår fra den straffbare virksomheten, kan pågripes uansett hvor lav strafferammen er.</li><li>§ 178: pågripelsen skal gjøres så skånsomt som forholdene tilsier.</li><li>Inngrepet må stå i forhold til saken. Er du i tvil, observer, noter signalement og ring politiet.</li></ul>'+
+'<h3>Eierens rett</h3><p>Eieren bestemmer over sin eiendom og kan sette ordensregler, nekte adgang og be folk gå. Vekteren gjør dette på vegne av eier eller oppdragsgiver. Bortvisning er en beskjed, ikke en rett til å bruke makt.</p>'+
+'<h3>Vaktvirksomhetsloven</h3><ul><li>Skal ivareta rettssikkerheten til dem som møter vektere, sikre kvalitet på tjenestene og gi offentlig kontroll.</li><li>Vaktselskap må ha tillatelse fra politiet.</li><li>Vektere må ha godkjent utdanning og tilfredsstillende vandel.</li><li>Vektere bærer godkjent uniform og legitimasjon.</li><li>Maktbruk og maktmidler er strengt regulert. Les gjeldende lov og forskrift på Lovdata, reglene er endret flere ganger.</li></ul>'+
+'<h3>Personvern</h3><ul><li>Personopplysningsloven og GDPR gjelder for kameraovervåking, logger og rapporter.</li><li>Samle bare inn det oppdraget krever, og del det bare med dem som skal ha det.</li></ul>'},
+{id:'risiko',mo:'RI',ds:'Verdi, trussel, sårbarhet, sannsynlighet, konsekvens, tiltak',ct:
+'<h2>Risikovurdering</h2><p>Risiko er en kombinasjon av hvor sannsynlig en uønsket hendelse er og hvor alvorlig konsekvensen blir. Mange bruker regnestykket <strong>sannsynlighet × konsekvens</strong>.</p>'+
+'<h3>Framgangsmåte</h3><ol><li><strong>Avgrens</strong>: hvilket objekt, hvilken virksomhet, hvilke verdier skal beskyttes?</li><li><strong>Finn uønskede hendelser</strong>: brann, tyveri, innbrudd, vold og trusler, ulykker, teknisk svikt, sabotasje.</li><li><strong>Vurder</strong> sannsynlighet og konsekvens for hver hendelse.</li><li><strong>Plasser i risikomatrise</strong>: grønn, gul eller rød.</li><li><strong>Foreslå tiltak</strong>.</li><li><strong>Følg opp</strong>: hvem gjør hva, når, og virket det?</li></ol>'+
+'<h3>To standarder du bør kjenne navnet på</h3><ul><li><strong>NS 5814</strong>: krav til risikovurderinger generelt.</li><li><strong>NS 5832</strong>: sikringsrisikoanalyse for villede handlinger. Bygger på tre faktorer: <strong>verdi, trussel og sårbarhet</strong>.</li></ul>'+
+'<h3>Tiltak</h3><ul><li><strong>Forebyggende</strong> (senker sannsynligheten): adgangskontroll, låser, lys, synlig vekter, opplæring.</li><li><strong>Konsekvensreduserende</strong> (begrenser skaden): sprinkler, branndører, førstehjelpsutstyr, beredskapsplan, øvelser.</li></ul><p>Tiltak deles ofte i <strong>tekniske/fysiske</strong>, <strong>organisatoriske</strong> og <strong>menneskelige</strong>. Det som står igjen etter tiltakene, kalles <strong>restrisiko</strong>.</p>'+
+'<h3>Eksempel på matrise</h3><table class="tbl"><tr><th>Risikotall</th><th>Farge</th><th>Betyr</th></tr><tr><td>1–6</td><td>Grønn</td><td>Akseptabel</td></tr><tr><td>7–12</td><td>Gul</td><td>Tiltak vurderes</td></tr><tr><td>13–25</td><td>Rød</td><td>Tiltak kreves</td></tr></table><p class="note">Grensene er et eksempel. Virksomheter setter egne akseptkriterier.</p>'+
+'<h3>Sikkerhetsbefaring</h3><p>Du går gjennom objektet og ser etter svakheter: dører, vinduer, lys, blindsoner, rutiner. Resultatet blir en sikringsplan med prioriterte tiltak.</p>'},
+{id:'beredskap',mo:'BE',ds:'Beredskapsplan, varsling, evakuering, øvelser, PLIVO',ct:
+'<h2>Beredskap</h2><p>En beredskapsplan sier hvem som gjør hva, når og hvordan når noe alvorlig skjer.</p>'+
+'<h3>Innhold i en enkel beredskapsplan</h3><ol><li>Hvilke hendelser planen gjelder (hentet fra risikovurderingen)</li><li>Varslingsliste med rekkefølge</li><li>Roller og ansvar</li><li>Tiltakskort for hver hendelse</li><li>Evakuering: rømningsveier og møteplass</li><li>Informasjon til publikum, oppdragsgiver og medier</li><li>Ressurser: utstyr, nøkler, tegninger, telefonnumre</li><li>Normalisering, evaluering og oppdatering</li></ol>'+
+'<h3>Nødnumre</h3><ul><li><strong>110</strong> brann</li><li><strong>112</strong> politi</li><li><strong>113</strong> medisinsk nødhjelp</li><li><strong>116 117</strong> legevakt</li><li><strong>02800</strong> politiet når det ikke haster</li><li><strong>22 59 13 00</strong> Giftinformasjonen</li></ul>'+
+'<h3>Øvelser</h3><ul><li><strong>Skrivebordsøvelse</strong>: dere snakker dere gjennom en hendelse.</li><li><strong>Varslingsøvelse</strong>: tester at varslingslisten virker.</li><li><strong>Funksjonsøvelse</strong>: øver én del, for eksempel evakuering.</li><li><strong>Fullskalaøvelse</strong>: alle roller, gjerne med nødetatene.</li></ul><p>Etter hver øvelse: evaluer og rett opp planen.</p>'+
+'<h3>PLIVO</h3><p>Pågående livstruende vold. Det er nødetatenes felles prosedyre. Vekterens jobb er å varsle 112, få folk og seg selv i sikkerhet og gi politiet opplysninger. Du skal ikke oppsøke gjerningspersonen.</p>'+
+'<h3>Mistenkelig gjenstand eller bombetrussel</h3><ul><li>Ikke rør eller flytt gjenstanden.</li><li>Hold avstand og hold andre unna.</li><li>Varsle 112 og følg virksomhetens tiltakskort.</li><li>Noter utseende, plassering, tidspunkt og hvem som fant den.</li><li>Ved telefontrussel: noter ordrett det som blir sagt.</li></ul>'},
+{id:'brann',mo:'BR',ds:'Branntrekanten, slokkemidler, brannklasser, brannvernrunde',ct:
+'<h2>Brannvern</h2><h3>Branntrekanten</h3><p>Brann trenger <strong>brennbart materiale, oksygen og varme</strong>. Fjerner du én av dem, slokker brannen.</p>'+
+'<h3>Når det brenner</h3><p><strong>Redde, varsle, slokke.</strong> Rekkefølgen tilpasses situasjonen. Lukk dører og vinduer når du går, det bremser spredningen.</p>'+
+'<h3>Slokkemidler</h3><ul><li><strong>Vann / brannslange</strong>: tre, papir, tekstil. Ikke på brennende fett, og ikke på strømførende anlegg.</li><li><strong>Pulver (ABC)</strong>: de fleste branner. Griser mye.</li><li><strong>Skum</strong>: faste stoffer og væsker.</li><li><strong>CO₂</strong>: elektrisk utstyr og væsker. Etterlater ikke søl.</li><li><strong>Brannteppe</strong>: små branner og klær. Kveler flammen.</li></ul>'+
+'<h3>Brannklasser</h3><ul><li><strong>A</strong> faste stoffer (tre, papir, tekstil)</li><li><strong>B</strong> væsker (bensin, olje)</li><li><strong>C</strong> gasser (propan)</li><li><strong>D</strong> metaller</li><li><strong>F</strong> matolje og fett</li></ul>'+
+'<h3>Brannvernrunde</h3><ul><li>Rømningsveier er frie hele veien ut</li><li>Nødutganger lar seg åpne uten nøkkel</li><li>Ledelys og nødlys virker</li><li>Branndører lukker og er ikke kilt opp</li><li>Slokkeutstyr er på plass, synlig og kontrollert</li><li>Brannsentralen viser ingen feil</li><li>Ingen lagring foran el-tavler eller i trapperom</li><li>Brannfarlig vare er riktig lagret</li></ul><p>Det du ikke får rettet selv, meldes som avvik.</p>'+
+'<h3>Roller</h3><p>Eieren har ansvar for at bygget er brannteknisk i orden. Den som bruker bygget, har ansvar for å bruke det riktig. Mange virksomheter har en brannvernleder som følger opp det daglige.</p>'},
+{id:'hms',mo:'HM',ds:'Internkontroll, verneombud, AMU, avvik, arbeidsmiljøloven',ct:
+'<h2>HMS</h2><p>Helse, miljø og sikkerhet. <strong>Arbeidsgiver</strong> har ansvaret. Arbeidstaker har plikt til å medvirke.</p>'+
+'<h3>Internkontrollforskriften § 5</h3><p>Virksomheten skal:</p><ol><li>ha lover og forskrifter tilgjengelig</li><li>sørge for at ansatte har nok kunnskap og ferdigheter</li><li>la arbeidstakerne medvirke</li><li>sette mål for HMS (skriftlig)</li><li>ha oversikt over organisasjon, ansvar og oppgaver (skriftlig)</li><li>kartlegge farer, vurdere risiko og lage planer og tiltak (skriftlig)</li><li>ha rutiner for å avdekke, rette opp og forebygge avvik (skriftlig)</li><li>overvåke og gjennomgå internkontrollen jevnlig (skriftlig)</li></ol>'+
+'<h3>Verneombud og AMU</h3><ul><li><strong>Verneombud</strong>: skal velges i alle virksomheter. Med færre enn 5 arbeidstakere kan partene avtale en annen ordning skriftlig.</li><li><strong>Arbeidsmiljøutvalg (AMU)</strong>: skal finnes når virksomheten jevnlig har minst 30 arbeidstakere. Mellom 10 og 30 kan en av partene kreve det.</li><li><strong>Bedriftshelsetjeneste (BHT)</strong>: rådgir om forebyggende arbeid.</li></ul><p class="note">Grensene ble endret 1. januar 2024. Eldre lærebøker sier 10 og 50.</p>'+
+'<h3>Arbeidsmiljøloven i vekterhverdagen</h3><ul><li>Krav om fullt forsvarlig arbeidsmiljø</li><li>Vern mot vold, trusler og trakassering</li><li>Regler for arbeidstid, nattarbeid og hvile</li><li>Rett til å varsle om kritikkverdige forhold</li><li>Arbeidstaker skal følge instrukser, bruke verneutstyr og melde fra om farer</li></ul>'+
+'<h3>Avvik</h3><p>Et avvik er et brudd på lov, forskrift, instruks eller rutine. Det skal <strong>meldes, rettes, årsaken finnes, og gjentakelse forebygges</strong>.</p>'+
+'<h3>Vernerunde</h3><p>Planlagt gjennomgang av arbeidsplassen for å finne farer. Verneombudet deltar.</p>'},
+{id:'konflikt',mo:'KO',ds:'Kommunikasjon, deeskalering, rus, egensikkerhet',ct:
+'<h2>Konflikthåndtering</h2><p>Målet er å løse situasjonen med minst mulig inngrep. Lærebøker bruker ofte en trappemodell (maktpyramide eller konflikttrapp). Trinnene heter litt forskjellig fra bok til bok, men tanken er den samme:</p>'+
+'<ol><li><strong>Synlig tilstedeværelse</strong></li><li><strong>Dialog</strong>: rolig samtale, spør hva som har skjedd</li><li><strong>Tydelig beskjed</strong>: hva som gjelder her, og hva som skjer hvis det fortsetter</li><li><strong>Bortvisning</strong> på vegne av eier</li><li><strong>Tilkalle politi</strong></li><li><strong>Fysisk inngrep</strong> bare når du har hjemmel (nødverge, nødrett, pågripelse)</li></ol>'+
+'<h3>Dempe en opphetet situasjon</h3><ul><li>Lytt ferdig før du svarer</li><li>Snakk rolig og lavere enn den andre</li><li>Vis at du har forstått: «Jeg hører at du er sint fordi …»</li><li>Bruk jeg-form: «Jeg trenger at du senker stemmen»</li><li>Gi to valg personen kan leve med</li><li>Ta samtalen bort fra publikum når det er trygt</li></ul>'+
+'<h3>Kroppen din</h3><ul><li>Hold minst en armlengdes avstand</li><li>Stå litt på skrå, med fri vei bak deg</li><li>Åpne, synlige hender</li><li>Ikke pek, ikke stå tett innpå</li></ul>'+
+'<h3>Egensikkerhet</h3><p>Du kan ikke hjelpe noen hvis du selv blir skadet. Går det mot vold: trekk deg ut, tilkall bistand og politi, og observer på avstand.</p>'+
+'<h3>Ruspåvirkede</h3><ul><li>Korte, enkle beskjeder, én om gangen</li><li>Regn med at personen kan skifte humør fort</li><li>Vurder om personen trenger helsehjelp. Bevisstløs eller vanskelig å vekke: ring 113</li></ul><p>Vanlige tegn: alkohol gir lukt, ustø gange og snøvlete tale. Sentralstimulerende gir uro, store pupiller og rask tale. Opioider gir små pupiller, sløvhet og langsom pust.</p>'+
+'<h3>Makt og sårbare mennesker</h3><p>Uniformen gir deg makt i møtet. Barn, eldre, psykisk syke og mennesker i krise trenger mer tid og mer ro. Kultur og språk kan gjøre at blikk, avstand og tone tolkes annerledes enn du mener det.</p>'},
+{id:'forstehjelp',mo:'FH',ds:'HLR, hjertestarter, sideleie, blødning, skadested',ct:
+'<h2>Førstehjelp</h2><h3>Livløs person</h3><ol><li>Sjekk bevissthet: snakk til og rist forsiktig</li><li>Rop på hjelp. Ring <strong>113</strong>, sett telefonen på høyttaler</li><li>Åpne luftveien: bøy hodet bakover, løft haken</li><li>Se, lytt og kjenn etter normal pust i inntil 10 sekunder</li><li><strong>Puster normalt</strong>: legg i sideleie og følg med på pusten</li><li><strong>Puster ikke normalt</strong>: start HLR med 30 kompresjoner og 2 innblåsinger</li><li>Få noen til å hente hjertestarter</li></ol>'+
+'<h3>HLR</h3><ul><li>Midt på brystet, 5 til 6 cm dypt, 100 til 120 trykk i minuttet</li><li>30 kompresjoner, 2 innblåsinger, uten pauser</li><li>Bytt på å komprimere hvis dere er flere</li></ul>'+
+'<h3>Hjertestarter</h3><p>BHLR er basal HLR. <strong>DHLR</strong> er HLR med defibrillator (hjertestarter).</p><ul><li>Slå på og følg talen</li><li>Elektroder på bar, tørr hud: én under høyre kragebein, én på venstre side under armhulen</li><li>Ingen rører pasienten under analyse og støt</li><li>Fortsett HLR straks etter støt</li></ul>'+
+'<h3>Bevisstløs som puster</h3><p>Sideleie holder luftveien fri. Bli hos pasienten og sjekk pusten hele tiden.</p>'+
+'<h3>Blødning</h3><ul><li>Trykk direkte på såret</li><li>Legg trykkbandasje</li><li>Hold den skadde i ro og varm</li><li>Stor blødning: ring 113</li></ul>'+
+'<h3>Sirkulasjonssvikt</h3><p>Blek, kald og klam hud, rask puls, uro eller sløvhet. Legg pasienten ned, hold varm, ikke gi mat eller drikke, ring 113.</p>'+
+'<h3>På et skadested</h3><ol><li>Sikre deg selv og stedet</li><li>Skaff oversikt: hva har skjedd, hvor mange er skadd?</li><li>Varsle riktig nødnummer</li><li>Gi førstehjelp, de som ikke puster eller blør mye først</li><li>Fordel oppgaver til dem som står rundt</li><li>Møt nødetatene og gi en kort rapport</li></ol>'},
+{id:'service',mo:'SE',ds:'Service, yrkesetikk, taushetsplikt, rapportskriving',ct:
+'<h2>Service og rapport</h2><h3>Service</h3><p>Vekteren er ofte den første folk møter. God service gjør sikkerhetsarbeidet lettere: folk som blir møtt ordentlig, følger oftere beskjeder.</p><ul><li>Hils, se folk, vær tilgjengelig</li><li>Gi riktig informasjon, eller finn noen som vet</li><li>Tilpass deg den du snakker med</li><li>Hold uniform og utstyr i orden</li></ul>'+
+'<h3>Yrkesetikk</h3><ul><li><strong>Likebehandling</strong>: samme regler for alle</li><li><strong>Integritet</strong>: ikke ta imot gaver eller fordeler</li><li><strong>Minste inngrep</strong>: ikke gjør mer enn situasjonen krever</li><li><strong>Forholdsmessighet</strong>: tiltaket skal stå i forhold til saken</li><li><strong>Lojalitet</strong> til instruks og oppdragsgiver, innenfor loven</li></ul>'+
+'<h3>Taushetsplikt</h3><p>Det du får vite i tjenesten om oppdragsgiver, sikkerhetsrutiner og personer, skal ikke deles med uvedkommende. Det gjelder også etter at du har sluttet.</p>'+
+'<h3>Rapport</h3><p>En rapport skal svare på:</p><ul><li><strong>Hvem</strong> var involvert?</li><li><strong>Hva</strong> skjedde?</li><li><strong>Hvor</strong>?</li><li><strong>Når</strong>?</li><li><strong>Hvordan</strong> skjedde det, og hva gjorde du?</li><li><strong>Hvem</strong> så det (vitner)?</li></ul><ul><li>Skriv saklig og i den rekkefølgen ting skjedde</li><li>Skill mellom det du så og hørte, og det du tror</li><li>Skriv så raskt som mulig etter hendelsen</li></ul>'+
+'<h3>Rapporttyper</h3><ul><li><strong>Vaktjournal / logg</strong>: fortløpende gjennom vakten</li><li><strong>Hendelsesrapport</strong>: én uønsket hendelse</li><li><strong>Avviksrapport</strong>: brudd på rutine eller krav</li><li><strong>Skaderapport</strong>: person- eller materiell skade</li></ul>'+
+'<h3>Tjenesteinstruks</h3><p>Beskriver oppgaver, rutiner og fullmakter på det enkelte objektet. Den er styringsdokumentet ditt på vakt.</p>'}
+];
+
+/* Flervalg: [tema, spørsmål, riktig, feil, feil, feil, forklaring] */
+var Q=[
+['juss','Hvilken paragraf i straffeloven handler om nødverge?','§ 18','§ 17','§ 19','§ 176','§ 17 er nødrett, § 18 nødverge og § 19 selvtekt.'],
+['juss','Hva må til for at en handling er lovlig nødverge?','Den avverger et ulovlig angrep, går ikke lenger enn nødvendig og er ikke åpenbart uforsvarlig','Den som angripes er i uniform','Politiet har gitt samtykke på forhånd','Angrepet er over, og du vil hindre at det skjer igjen','Vilkårene står i straffeloven § 18. Når angrepet er over, er det ikke lenger nødverge.'],
+['juss','Når er selvtekt lovlig etter straffeloven § 19?','Når den som har retten gjenoppretter en ulovlig endret tilstand, og det er urimelig å vente på myndighetene','Når du vil straffe noen som har gjort noe galt','Når oppdragsgiver har bedt deg om det','Alltid når noe er stjålet, uansett hvor lang tid som har gått','Selvtekt handler om å gjenopprette, ikke om å straffe.'],
+['juss','Hva er nødrett?','En ellers straffbar handling for å redde liv, helse eller eiendom fra en fare som ikke kan avverges på annen rimelig måte','Retten til å forsvare seg mot et angrep','Retten til å pågripe på fersk gjerning','En rett bare politiet har','Nødrett står i § 17. Skaderisikoen må være langt større enn skaderisikoen ved handlingen.'],
+['juss','Du knuser en bilrute for å få ut et barn i sterk varme. Hvilken regel dekker det?','Nødrett','Nødverge','Selvtekt','Eierrådighet','Det finnes ikke noe angrep, men en fare for liv og helse. Da er det nødrett.'],
+['juss','En person slår etter deg, og du holder armene hans fast til han roer seg. Hvilken regel dekker det?','Nødverge','Nødrett','Selvtekt','Vaktvirksomhetsloven','Du avverger et ulovlig angrep. Det er nødverge.'],
+['juss','Har vektere politimyndighet?','Nei, de har samme rettigheter som alle andre','Ja, på eget vaktområde','Ja, når de bærer uniform','Ja, etter fullført fagbrev','Vektere handler på vegne av eier og med de rettighetene alle har.'],
+['juss','Hvem kan pågripe en mistenkt som treffes på fersk gjerning?','Enhver','Bare politiet','Bare vektere med fagbrev','Bare den som eier stedet','Straffeprosessloven § 176 gir alle denne retten når vilkårene for pågripelse er oppfylt.'],
+['juss','Hva skal en privatperson gjøre etter å ha pågrepet noen?','Straks overgi den pågrepne til politiet','Avhøre personen og skrive rapport','Holde personen til oppdragsgiver kommer','Ta bilde og la personen gå','Loven sier straks. Ring politiet med en gang.'],
+['juss','Hvordan skal en pågripelse gjennomføres?','Så skånsomt som forholdene tilsier','Med håndjern i alle tilfeller','Så raskt som mulig, uansett middel','Alltid med minst to vektere','Det følger av straffeprosessloven § 178.'],
+['juss','Hva er hovedregelen om strafferamme for pågripelse (strpl. § 171)?','Handlingen må kunne gi høyere straff enn fengsel i 6 måneder','Alle lovbrudd gir rett til pågripelse','Handlingen må kunne gi minst 3 års fengsel','Det holder at oppdragsgiver ber om det','I tillegg kreves skjellig grunn til mistanke og et særvilkår, som fare for at personen stikker av.'],
+['juss','Når kan noen pågripes uansett hvor lav strafferammen er (strpl. § 173)?','Når personen treffes på fersk gjerning og ikke avstår fra den straffbare virksomheten','Når personen er uhøflig','Når personen ikke vil vise legitimasjon til vekteren','Når butikken ber om det','§ 173 gjelder den som fortsetter lovbruddet etter å ha blitt tatt på fersk gjerning.'],
+['juss','Hva gir deg grunnlag for å be en person forlate kjøpesenteret?','Eierens råderett over eiendommen, som du utøver på vegne av eier','Politiloven','At du har gjennomført vekterkurs','Straffeloven § 18','Eieren bestemmer hvem som får være på eiendommen og hvilke regler som gjelder.'],
+['juss','Hvem gir tillatelse til å drive vaktvirksomhet?','Politiet','Arbeidstilsynet','Kommunen','NHO','Det følger av vaktvirksomhetsloven.'],
+['juss','Hvilket regelverk gjelder for kameraovervåking og lagring av opptak?','Personopplysningsloven og GDPR','Brann- og eksplosjonsvernloven','Straffeloven § 17','Internkontrollforskriften alene','Opptak av personer er personopplysninger.'],
+['brann','Hva består branntrekanten av?','Brennbart materiale, oksygen og varme','Røyk, flammer og gass','Alarm, sprinkler og slokkeapparat','Redde, varsle og slokke','Fjerner du én av de tre, slokker brannen.'],
+['brann','Hva er huskeregelen når det brenner?','Redde, varsle, slokke','Slokke, rydde, varsle','Varsle, vente, evakuere','Lufte, slokke, redde','Rekkefølgen tilpasses situasjonen, men liv går først.'],
+['brann','Hva skal du aldri bruke på brennende fett i en gryte?','Vann','Brannteppe','Lokk','Slokkeapparat merket F','Vann fordamper eksplosivt og kaster brennende fett ut i rommet.'],
+['brann','Hvilken brannklasse er tre, papir og tekstil?','A','B','C','F','A er faste stoffer.'],
+['brann','Hvilken brannklasse er brennbare væsker som bensin?','B','A','D','F','B er væsker, C er gasser.'],
+['brann','Hvilken brannklasse er matolje og frityrfett?','F','A','B','D','F er matolje og fett.'],
+['brann','Hvilket slokkemiddel passer best på elektrisk utstyr?','CO₂','Vann fra brannslange','Våte håndklær','Skum fra bøtte','CO₂ leder ikke strøm og etterlater ikke søl.'],
+['brann','Hvilket nummer har brannvesenet?','110','112','113','116 117','110 brann, 112 politi, 113 medisinsk nødhjelp.'],
+['brann','På brannvernrunden står paller foran en nødutgang. Hva gjør du?','Får dem flyttet med en gang og melder avvik','Noterer det til neste måned','Ingenting, det er lagerets ansvar','Låser døren så ingen snubler','Rømningsveier skal være frie hele tiden.'],
+['brann','En branndør er kilt opp med en kile. Hva er riktig?','Fjerne kilen, lukke døren og melde avvik','La den stå, det gir bedre luft','Sette en stol der i stedet','Vente til brannvernleder kommer på jobb','En branndør som står åpen, stopper verken røyk eller flammer.'],
+['brann','Hvorfor lukker du dører når du forlater et rom det brenner i?','Det bremser spredning av røyk og brann','Det slokker brannen helt','Det er for å hindre tyveri','Det er bare viktig om natten','Lukkede dører gir folk mer tid til å komme seg ut.'],
+['brann','Hva kan et brannteppe brukes til?','Kvele små branner og flammer i klær','Slokke store væskebranner','Kjøle ned el-tavler','Erstatte branndør','Teppet stenger for oksygen.'],
+['brann','Hvem har ansvar for at bygget er brannteknisk i orden?','Eieren','Vekteren på vakt','Brannvesenet','Kundene','Brukeren har ansvar for å bruke bygget riktig, eieren for bygget og anleggene.'],
+['hms','Hva er internkontroll?','Systematiske tiltak som sikrer at virksomheten følger HMS-lovgivningen','Politiets kontroll av vaktselskaper','En årlig brannøvelse','Kontroll av ansattes vesker','Definisjonen står i internkontrollforskriften.'],
+['hms','Hvem har ansvaret for HMS i virksomheten?','Arbeidsgiver','Verneombudet','Den enkelte arbeidstaker','Bedriftshelsetjenesten','Arbeidstaker skal medvirke, men ansvaret ligger hos arbeidsgiver.'],
+['hms','Hva sier arbeidsmiljøloven om verneombud?','Alle virksomheter skal ha det, men med færre enn 5 arbeidstakere kan en annen ordning avtales','Bare virksomheter med over 50 ansatte trenger det','Det er frivillig','Bare industribedrifter trenger det','Grensen ble senket fra 10 til 5 fra 1. januar 2024.'],
+['hms','Når skal en virksomhet ha arbeidsmiljøutvalg (AMU)?','Når den jevnlig har minst 30 arbeidstakere','Når den har minst 5 arbeidstakere','Når den har minst 100 arbeidstakere','Bare når Arbeidstilsynet krever det','Grensen var 50 før 2024. Mellom 10 og 30 kan en av partene kreve AMU.'],
+['hms','Hva er et avvik?','Et brudd på lov, forskrift, instruks eller rutine','En forbedring av en rutine','En uenighet mellom kolleger','En ny arbeidsoppgave','Avvik skal meldes, rettes og forebygges.'],
+['hms','Hva gjør du med et avvik du ikke kan rette selv?','Melder det skriftlig i avvikssystemet','Lar det ligge til noen andre ser det','Sier det til en kollega i pausen','Venter til årlig gjennomgang','Uten melding blir avviket ikke fulgt opp.'],
+['hms','Hva er arbeidstakers plikt i HMS-arbeidet?','Å medvirke, følge instrukser og melde fra om farer','Å lage virksomhetens HMS-mål','Å betale for eget verneutstyr','Å velge bedriftshelsetjeneste','Medvirkningsplikten står i arbeidsmiljøloven.'],
+['hms','Hva er bedriftshelsetjenesten (BHT)?','Fagfolk som rådgir virksomheten om forebyggende helse- og miljøarbeid','Legevakten for ansatte','Arbeidstilsynets lokale kontor','Et forsikringsselskap','BHT har en fri og uavhengig rådgiverrolle.'],
+['hms','Hva er en vernerunde?','En planlagt gjennomgang av arbeidsplassen for å finne farer','En runde med kaffe for nyansatte','Politiets tilsyn','En øvelse med brannvesenet','Verneombudet deltar på vernerunden.'],
+['hms','Hva må dokumenteres skriftlig etter internkontrollforskriften?','Blant annet mål, ansvarsfordeling, kartlegging av farer og avviksrutiner','Ingenting, muntlig holder','Bare ulykker med sykehusinnleggelse','Bare lønn og arbeidstid','Punkt 4 til 8 i § 5 krever skriftlig dokumentasjon.'],
+['hms','Hva sier arbeidsmiljøloven om vold og trusler?','Arbeidstaker skal så langt som mulig beskyttes mot vold og trusler','Det er en del av jobben som vekter og ikke regulert','Det er bare politiets ansvar','Det gjelder bare på kontorarbeidsplasser','Arbeidsgiver må vurdere risikoen og sette inn tiltak.'],
+['hms','Hva har arbeidstakere rett til når de ser kritikkverdige forhold?','Å varsle','Å nekte alt arbeid','Å si opp uten oppsigelsestid','Å bytte arbeidsgiver samme dag','Arbeidsmiljøloven har egne regler om varsling og vern mot gjengjeldelse.'],
+['beredskap','Hvilket nummer har politiet i nødsituasjoner?','112','110','113','02800','02800 er politiets nummer når det ikke haster.'],
+['beredskap','Hvilket nummer ringer du ved alvorlig sykdom eller skade?','113','110','112','116 117','116 117 er legevakt og er ikke et nødnummer.'],
+['beredskap','Hva står PLIVO for?','Pågående livstruende vold','Plan for lokal innsats ved overfall','Politiets liste over vaktobjekter','Prosedyre for løpende internkontroll','PLIVO er nødetatenes felles prosedyre.'],
+['beredskap','Hva er vekterens oppgave ved pågående livstruende vold?','Varsle 112 og få folk og seg selv i sikkerhet','Oppsøke og stanse gjerningspersonen','Låse alle ute og inne','Vente på beskjed fra oppdragsgiver','Vektere skal ikke gå i aksjon mot gjerningspersonen.'],
+['beredskap','Hva bør en beredskapsplan inneholde?','Varslingsliste, roller, tiltakskort, evakuering og ressurser','Bare telefonnummeret til daglig leder','Lønnsoversikt for vekterne','Reklame for vaktselskapet','Planen skal kunne brukes av en som er ny på objektet.'],
+['beredskap','Du finner en forlatt bag som ser mistenkelig ut. Hva gjør du først?','Lar den stå, holder folk unna og varsler etter tiltakskortet','Åpner den for å se etter eier','Bærer den ut på parkeringsplassen','Sparker borti den for å høre om den tikker','Aldri rør eller flytt en mistenkelig gjenstand.'],
+['beredskap','Hva er en skrivebordsøvelse?','Deltakerne snakker seg gjennom en tenkt hendelse','En øvelse i å rydde kontoret','Full evakuering med nødetater','Test av brannalarmen','Den er billig, rask og avslører hull i planen.'],
+['beredskap','Hva er en fullskalaøvelse?','En øvelse der alle roller spilles ut i praksis, gjerne med nødetatene','En gjennomgang av planen på e-post','En test av én varslingsliste','En teoriprøve','Fullskala er den mest krevende og mest realistiske øvelsesformen.'],
+['beredskap','Hvorfor har man en fast møteplass ved evakuering?','For å kunne telle opp og vite om noen mangler','For at folk skal kunne hente bilen','For at media skal vite hvor de skal stå','For å spare tid etterpå','Opptelling forteller nødetatene om noen kan være igjen inne.'],
+['beredskap','Hva gjør dere etter en øvelse?','Evaluerer og oppdaterer planen','Ingenting, øvelsen er ferdig','Bytter vaktselskap','Sletter loggen','En øvelse uten evaluering gir lite læring.'],
+['beredskap','Noen ringer inn en bombetrussel. Hva gjør du under samtalen?','Noterer ordrett det som blir sagt og holder personen på tråden','Legger på med en gang','Ler det bort','Setter personen over til en kollega uten å si noe','Detaljer om stemme, ordvalg og bakgrunnslyder hjelper politiet.'],
+['risiko','Hvordan regnes risiko vanligvis ut?','Sannsynlighet × konsekvens','Antall vektere × antall kameraer','Kostnad + tid','Trussel − tiltak','Tallet plasseres i en risikomatrise.'],
+['risiko','Hva gjør et forebyggende tiltak?','Senker sannsynligheten for at hendelsen skjer','Begrenser skaden etter at det har skjedd','Dokumenterer hendelsen','Flytter ansvaret til oppdragsgiver','Adgangskontroll og lys er eksempler.'],
+['risiko','Hvilket av disse er et konsekvensreduserende tiltak?','Sprinkleranlegg','Adgangskontroll','Gjerde','Bakgrunnssjekk','Sprinkler hindrer ikke at det begynner å brenne, men begrenser skaden.'],
+['risiko','Hva er første steg i en risikovurdering?','Avgrense hva som skal vurderes og hvilke verdier som skal beskyttes','Kjøpe inn kameraer','Skrive sluttrapporten','Sette opp vaktplan','Uten avgrensning vet du ikke hva du leter etter.'],
+['risiko','Hvilke tre faktorer bygger en sikringsrisikoanalyse etter NS 5832 på?','Verdi, trussel og sårbarhet','Pris, tid og kvalitet','Brann, vann og strøm','Person, sted og tid','NS 5832 gjelder villede uønskede handlinger.'],
+['risiko','Hva er restrisiko?','Risikoen som står igjen etter at tiltak er satt inn','Risikoen før noen har vurdert den','Risiko som bare gjelder om natten','Risiko forsikringen dekker','All risiko kan ikke fjernes. Restrisikoen må aksepteres av den som eier risikoen.'],
+['risiko','Hva viser rødt felt i en risikomatrise?','Risikoen er uakseptabel, tiltak må til','Alt er i orden','Hendelsen har aldri skjedd','Tiltaket er for dyrt','Rødt betyr høy sannsynlighet, alvorlig konsekvens eller begge deler.'],
+['risiko','Hva er en sikkerhetsbefaring?','En fysisk gjennomgang av objektet for å finne svakheter','Et salgsmøte med kunden','En brannøvelse','Et intervju med nyansatte','Befaringen gir grunnlag for sikringsplanen.'],
+['risiko','Hvilket er et organisatorisk tiltak?','Rutine for nøkkelutlevering','Gitter foran vindu','Bevegelsesdetektor','Sikkerhetsglass','Rutiner, instrukser og opplæring er organisatoriske tiltak.'],
+['risiko','Hva er akseptkriterier?','Grensene virksomheten har satt for hvor høy risiko den godtar','Krav til vekterens uniform','Regler for hvem som slipper inn','Karakterkrav på fagprøven','Akseptkriteriene avgjør hva som blir grønt, gult og rødt.'],
+['konflikt','Hva er første trinn når du vil løse en situasjon med minst mulig inngrep?','Synlig tilstedeværelse og dialog','Bortvisning','Fysisk fastholding','Å ringe politiet uansett','Start lavest mulig og trapp bare opp ved behov.'],
+['konflikt','Hvor nær bør du stå en opphisset person?','Minst en armlengdes avstand','Så nær at du kan holde fast','Ansikt til ansikt','Bak personen','Avstand gir deg tid til å reagere og virker mindre truende.'],
+['konflikt','Hvilken setning er et jeg-budskap?','«Jeg trenger at du senker stemmen»','«Du må slutte å rope»','«Alle her synes du er plagsom»','«Nå ringer jeg politiet»','Jeg-form beskriver hva du trenger uten å angripe den andre.'],
+['konflikt','Situasjonen er i ferd med å bli voldelig, og du er alene. Hva gjør du?','Trekker deg ut, tilkaller bistand og politi og observerer','Går inn og legger personen i bakken','Blir stående og diskuterer','Låser døren bak dere','Egensikkerhet går først.'],
+['konflikt','Hvordan snakker du til en tydelig ruspåvirket person?','Rolig, med korte og enkle beskjeder','Høyt og bestemt så det går inn','Med mange forklaringer på en gang','Du snakker ikke til personen','Rus svekker evnen til å ta imot mye informasjon.'],
+['konflikt','Når kan du bruke fysisk makt mot en person?','Bare når du har hjemmel, som nødverge, nødrett eller lovlig pågripelse','Når personen nekter å gå','Når oppdragsgiver ber om det','Når personen er uhøflig','Bortvisning gir ikke i seg selv rett til å bruke makt.'],
+['konflikt','Hva er aktiv lytting?','Å la personen snakke ferdig og vise at du har forstått','Å notere alt mens personen snakker','Å gjenta reglene til personen gir seg','Å nikke mens du ser en annen vei','Folk roer seg oftere når de føler seg hørt.'],
+['konflikt','Hvorfor kan det hjelpe å ta samtalen bort fra tilskuere?','Personen slipper å tape ansikt foran andre','Da kan du bruke makt uten vitner','Da slipper du å skrive rapport','Det er bare for å rydde gangen','Publikum gjør det vanskeligere å gi seg.'],
+['konflikt','Hvordan bør du stå når du snakker med en sint person?','Litt på skrå med åpne, synlige hender','Rett foran med armene i kors','Med hendene i lommene','Med ryggen mot en vegg uten utvei','Skrå stilling er mindre konfronterende og gir deg bedre balanse.'],
+['konflikt','En person er vanskelig å vekke og puster tungt etter rusbruk. Hva gjør du?','Ringer 113','Bortviser personen','Lar personen sove det av seg','Heller vann i ansiktet på personen','Nedsatt bevissthet kan være livstruende.'],
+['konflikt','Hva betyr det at vekteren har en maktposisjon?','Uniform og rolle gir deg overtak i møtet, og det må brukes varsomt','Du kan bestemme over alle på området','Du har politimyndighet','Du kan kreve legitimasjon av hvem som helst','Særlig i møte med barn, eldre og mennesker i krise.'],
+['forstehjelp','Hva er forholdet mellom kompresjoner og innblåsinger ved HLR på voksne?','30 kompresjoner og 2 innblåsinger','15 og 2','5 og 1','50 og 5','30:2, uten unødige pauser.'],
+['forstehjelp','En person er bevisstløs, men puster normalt. Hva gjør du?','Legger personen i sideleie og følger med på pusten','Starter HLR','Setter personen opp i en stol','Gir personen vann','Sideleie holder luftveien fri.'],
+['forstehjelp','En person er bevisstløs og puster ikke normalt. Hva gjør du?','Ringer 113, starter HLR og får noen til å hente hjertestarter','Legger personen i sideleie og venter','Løfter beina og venter','Leter etter legitimasjon','Hvert minutt uten HLR senker sjansen for å overleve.'],
+['forstehjelp','Hva betyr DHLR?','Hjerte-lunge-redning med defibrillator (hjertestarter)','Dobbel hjerte-lunge-redning','Direkte hjelp fra legevakt','Daglig helse- og livredningsrutine','BHLR er basal HLR, DHLR er HLR med hjertestarter.'],
+['forstehjelp','Hvor festes elektrodene fra hjertestarteren på en voksen?','Under høyre kragebein og på venstre side under armhulen','Begge på magen','Én på hver skulder','Begge på ryggen','Følg tegningen på elektrodene.'],
+['forstehjelp','Hva gjør alle rundt mens hjertestarteren analyserer?','Lar være å røre pasienten','Fortsetter kompresjonene','Holder pasientens hender','Løfter pasientens bein','Berøring kan forstyrre analysen.'],
+['forstehjelp','Hvor fort skal du komprimere ved HLR?','100 til 120 ganger i minuttet','30 ganger i minuttet','60 ganger i minuttet','Så fort du klarer','Dybden skal være 5 til 6 cm på voksne.'],
+['forstehjelp','Hvordan stanser du en kraftig blødning fra en arm?','Trykker direkte på såret og legger trykkbandasje','Skyller lenge med vann','Lar såret lufttørke','Gir smertestillende','Direkte trykk er det viktigste tiltaket.'],
+['forstehjelp','Hva er det første du gjør når du kommer til et skadested?','Sikrer deg selv og stedet','Begynner på rapporten','Flytter alle skadde','Ringer oppdragsgiver','Du kan ikke hjelpe hvis du selv blir skadet.'],
+['forstehjelp','Hvilke tegn tyder på sirkulasjonssvikt?','Blek, kald og klam hud og rask puls','Rød, varm og tørr hud','Langsom puls og god farge','Sult og tørste','Legg pasienten ned, hold varm og ring 113.'],
+['forstehjelp','Hvor lenge sjekker du om en bevisstløs person puster normalt?','Inntil 10 sekunder','Ett minutt','To til tre minutter','Du sjekker ikke','Er du i tvil om pusten er normal, start HLR.'],
+['service','Hva skal en hendelsesrapport svare på?','Hvem, hva, hvor, når, hvordan og vitner','Bare tid og sted','Hva du synes om de involverte','Bare det oppdragsgiver liker å høre','Rapporten skal kunne leses av en som ikke var der.'],
+['service','Hva betyr det å skille observasjon fra vurdering i en rapport?','Å skrive hva du så og hørte, og tydelig markere hva du selv tror','Å la være å skrive det du er usikker på','Å skrive to rapporter','Å la kollegaen skrive vurderingen','«Han luktet alkohol og sjanglet» er observasjon. «Han var full» er vurdering.'],
+['service','Hva innebærer taushetsplikten for en vekter?','Du deler ikke det du får vite i tjenesten med uvedkommende','Du kan fortelle om jobben hjemme så lenge du ikke nevner navn på kunden','Den gjelder bare skriftlige dokumenter','Den slutter når vakten er over','Plikten gjelder også etter at arbeidsforholdet er slutt.'],
+['service','Hva er minste inngreps prinsipp?','Du gjør ikke mer enn det som trengs for å løse situasjonen','Du griper aldri inn','Du bruker alltid det sterkeste middelet først','Du overlater alt til politiet','Prinsippet gjelder alt fra ordbruk til fysisk makt.'],
+['service','Hvilken rapport skriver du når en rutine ikke er fulgt?','Avviksrapport','Skaderapport','Tilbud','Vaktplan','Avviksrapporten setter i gang retting og forebygging.'],
+['service','Hvorfor er service en del av sikkerhetsarbeidet?','Folk som blir møtt ordentlig, følger oftere beskjeder, og du oppdager mer','Fordi vektere egentlig er selgere','Det er det ikke, service er noe annet','Bare fordi kunden betaler for det','Kontakt med publikum er også en kilde til informasjon.'],
+['service','Hva er en tjenesteinstruks?','Dokumentet som beskriver oppgaver, rutiner og fullmakter på objektet','En lov vedtatt av Stortinget','En kvittering for utlevert utstyr','En reklamebrosjyre','Instruksen er styringsdokumentet ditt på vakt.'],
+['service','Hva betyr likebehandling i vekterrollen?','Samme regler og samme respekt for alle, uansett bakgrunn','Alle skal bortvises like ofte','Du skal behandle stamkunder bedre','Du skal bare snakke norsk','Forskjellsbehandling svekker tilliten til deg og oppdragsgiver.'],
+['service','Når bør du skrive rapporten?','Så snart som mulig etter hendelsen','Ved månedsslutt','Bare hvis noen spør','Når politiet ber om den','Hukommelsen svekkes fort. Skriv mens detaljene er ferske.'],
+['service','Hva er sikkerhetskultur?','Holdningene og vanene som avgjør hvordan folk faktisk opptrer når det gjelder sikkerhet','Antall kameraer i bygget','En årlig fest for vekterne','Reglene i personalhåndboken','Kultur er det folk gjør når ingen ser på.'],
+['service','En kunde tilbyr deg en gave for at du skal «se en annen vei». Hva gjør du?','Avslår, og melder fra til leder','Tar imot hvis verdien er lav','Tar imot, men gjør jobben likevel','Sier ingenting til noen','Integritet er grunnlaget for tilliten vekteren har.']
+];
+
+Q=Q.concat(window.QX||[]);
+function qid(t){var h=5381;for(var i=0;i<t.length;i++)h=((h<<5)+h+t.charCodeAt(i))|0;return (h>>>0).toString(36)}
+
+/* Flashcards: [kategori, spørsmål, svar]. Ordboka legges til automatisk. */
+var FC=[
+['Juss','Hva er vilkårene for nødrett (strl. § 17)?','Redde liv, helse, eiendom eller annen interesse fra en fare som ikke kan avverges på annen rimelig måte. Skaderisikoen må være langt større enn skaderisikoen ved handlingen.'],
+['Juss','Hva er vilkårene for nødverge (strl. § 18)?','Avverge et ulovlig angrep. Ikke gå lenger enn nødvendig. Ikke gå åpenbart ut over det forsvarlige.'],
+['Juss','Hva er selvtekt (strl. § 19)?','Den som har retten gjenoppretter en ulovlig endret tilstand når det er urimelig å vente på myndighetene. Makt mot person bare når rettskrenkelsen er åpenbar.'],
+['Juss','Hva sier strpl. § 176 om private?','Enhver kan pågripe den som treffes eller forfølges på fersk gjerning eller ferske spor, og skal straks overgi den pågrepne til politiet.'],
+['Juss','Hva er forskjellen på nødrett og nødverge?','Nødverge er forsvar mot et ulovlig angrep. Nødrett er å avverge en fare som ikke er et angrep.'],
+['Juss','Har vektere politimyndighet?','Nei. De har samme rettigheter som alle andre og handler på vegne av eier.'],
+['Juss','Hva bygger bortvisning på?','Eierens råderett over eiendommen. Det gir ikke rett til å bruke makt.'],
+['Juss','Hva sier strpl. § 173 første ledd?','Den som treffes på fersk gjerning og ikke avstår, kan pågripes uansett strafferamme.'],
+['Juss','Hvordan skal en pågripelse gjennomføres (strpl. § 178)?','Så skånsomt som forholdene tilsier.'],
+['Brann','Hva er branntrekanten?','Brennbart materiale, oksygen og varme.'],
+['Brann','Hva er huskeregelen ved brann?','Redde, varsle, slokke.'],
+['Brann','Hvilke brannklasser finnes?','A faste stoffer, B væsker, C gasser, D metaller, F matolje og fett.'],
+['Brann','Når bruker du ikke vann?','På brennende fett og på strømførende anlegg.'],
+['Brann','Hva ser du etter på en brannvernrunde?','Frie rømningsveier, nødutganger som åpner, nødlys, lukkede branndører, slokkeutstyr på plass, ingen feil på brannsentralen.'],
+['HMS','Hva er internkontroll?','Systematiske tiltak som sikrer at virksomheten følger HMS-lovgivningen.'],
+['HMS','Når må en virksomhet ha verneombud?','Alltid. Med færre enn 5 arbeidstakere kan partene skriftlig avtale en annen ordning.'],
+['HMS','Når må en virksomhet ha AMU?','Fra 30 arbeidstakere. Mellom 10 og 30 hvis en av partene krever det.'],
+['HMS','Hva gjør du med et avvik?','Melder det. Deretter skal det rettes, årsaken finnes og gjentakelse forebygges.'],
+['HMS','Hvem har ansvaret for HMS?','Arbeidsgiver. Arbeidstaker har plikt til å medvirke.'],
+['Beredskap','Hva er nødnumrene?','110 brann, 112 politi, 113 medisinsk nødhjelp. Legevakt 116 117.'],
+['Beredskap','Hva inneholder en beredskapsplan?','Hendelser, varslingsliste, roller, tiltakskort, evakuering, informasjon, ressurser, evaluering.'],
+['Beredskap','Hva er PLIVO?','Pågående livstruende vold. Nødetatenes prosedyre. Vekteren varsler og får folk i sikkerhet.'],
+['Beredskap','Hva gjør du med en mistenkelig gjenstand?','Ikke rør. Hold avstand, hold folk unna, varsle 112 og følg tiltakskortet.'],
+['Beredskap','Hvilke øvelsestyper finnes?','Skrivebordsøvelse, varslingsøvelse, funksjonsøvelse og fullskalaøvelse.'],
+['Risiko','Hvordan regnes risiko?','Sannsynlighet × konsekvens.'],
+['Risiko','Hva er forskjellen på forebyggende og konsekvensreduserende tiltak?','Forebyggende senker sannsynligheten. Konsekvensreduserende begrenser skaden.'],
+['Risiko','Hva er de tre faktorene i NS 5832?','Verdi, trussel og sårbarhet.'],
+['Risiko','Hva er stegene i en risikovurdering?','Avgrense, finne uønskede hendelser, vurdere sannsynlighet og konsekvens, matrise, tiltak, oppfølging.'],
+['Konflikt','Hva er rekkefølgen når du trapper opp?','Tilstedeværelse, dialog, tydelig beskjed, bortvisning, politi, fysisk inngrep bare med hjemmel.'],
+['Konflikt','Hvordan demper du en opphetet situasjon?','Lytt ferdig, snakk rolig, vis at du har forstått, bruk jeg-form, gi valg.'],
+['Konflikt','Hvordan står du foran en sint person?','En armlengdes avstand, litt på skrå, åpne hender, fri vei bak deg.'],
+['Konflikt','Hva er tegn på opioidrus?','Små pupiller, sløvhet og langsom pust. Vanskelig å vekke: ring 113.'],
+['Førstehjelp','Hva gjør du med en bevisstløs som puster normalt?','Sideleie, 113, følg med på pusten.'],
+['Førstehjelp','Hva gjør du med en bevisstløs som ikke puster normalt?','113, HLR 30:2 og hjertestarter.'],
+['Førstehjelp','Hvor dypt og hvor fort komprimerer du?','5 til 6 cm, 100 til 120 i minuttet.'],
+['Førstehjelp','Hva gjør du først på et skadested?','Sikrer deg selv og stedet, skaffer oversikt, varsler, gir førstehjelp.'],
+['Førstehjelp','Hvordan stanser du en blødning?','Direkte trykk på såret og trykkbandasje. Hold den skadde i ro og varm.'],
+['Rapport','Hva skal en rapport svare på?','Hvem, hva, hvor, når, hvordan, og hvem så det.'],
+['Rapport','Hva er forskjellen på observasjon og vurdering?','Observasjon er det du så og hørte. Vurdering er det du tror ut fra det.'],
+['Rapport','Hva gjelder taushetsplikten?','Alt du får vite i tjenesten om oppdragsgiver, rutiner og personer. Også etter at du har sluttet.'],
+['Fagprøve','Hvilke fire deler har fagprøven?','Planlegging, gjennomføring, egenvurdering og dokumentasjon.']
+];
+
+/* Ordbok: [kategori, ord, forklaring] */
+var GL=[
+['Juss','Nødrett','Straffeloven § 17. Lovlig handling for å redde liv, helse eller eiendom fra en fare som ikke kan avverges på annen rimelig måte.'],
+['Juss','Nødverge','Straffeloven § 18. Lovlig forsvar mot et ulovlig angrep, så lenge det ikke går lenger enn nødvendig.'],
+['Juss','Selvtekt','Straffeloven § 19. Den som har retten gjenoppretter en ulovlig endret tilstand uten å vente på myndighetene.'],
+['Juss','Pågripelse','Å ta fra en person friheten midlertidig på grunn av mistanke om en straffbar handling.'],
+['Juss','Borgerarrest','Dagligtale for privat pågripelse etter straffeprosessloven § 176.'],
+['Juss','Fersk gjerning','Når noen blir tatt mens lovbruddet skjer eller rett etterpå.'],
+['Juss','Ferske spor','Når noen forfølges uten opphold fra gjerningsstedet.'],
+['Juss','Skjellig grunn til mistanke','Det er mer sannsynlig at personen har gjort det enn at han ikke har det.'],
+['Juss','Hjemmel','Rettslig grunnlag for det du gjør, for eksempel en lovparagraf eller eierens råderett.'],
+['Juss','Legalitetsprinsippet','Inngrep mot enkeltpersoner krever hjemmel i lov.'],
+['Juss','Eierrådighet','Eierens rett til å bestemme over eiendommen, sette ordensregler og nekte adgang.'],
+['Juss','Bortvisning','Beskjed om å forlate stedet, gitt på vegne av eier.'],
+['Juss','Utestengelse','Forbud mot å komme tilbake til stedet i en periode, bestemt av eier.'],
+['Juss','Forholdsmessighet','Inngrepet skal stå i rimelig forhold til det som har skjedd og det du vil oppnå.'],
+['Juss','Minste inngreps prinsipp','Bruk det mildeste middelet som løser situasjonen.'],
+['Juss','Vaktvirksomhetsloven','Loven som regulerer vaktselskaper og vektere: tillatelse, utdanning, vandel, uniform og kontroll.'],
+['Juss','Vaktvirksomhetsforskriften','Forskriften med detaljerte regler til vaktvirksomhetsloven.'],
+['Juss','Vandel','Hvordan du har opptrådt i forhold til loven. Dokumenteres med politiattest.'],
+['Juss','Politiattest','Attest fra politiet som viser om du er registrert med straffbare forhold.'],
+['Juss','Straffeloven','Loven som sier hva som er straffbart, og når en handling likevel er lovlig.'],
+['Juss','Straffeprosessloven','Loven om hvordan straffesaker behandles, blant annet pågripelse.'],
+['Juss','Personopplysningsloven','Norsk lov som gjennomfører GDPR. Gjelder all behandling av personopplysninger.'],
+['Juss','GDPR','EUs personvernforordning. Krever lovlig grunnlag, formål og sikring av personopplysninger.'],
+['Juss','Personopplysning','Opplysning som kan knyttes til en person, for eksempel navn, bilde eller bilnummer.'],
+['Juss','Taushetsplikt','Plikt til ikke å dele det du får vite i tjenesten med uvedkommende.'],
+['Juss','Naskeri','Eldre betegnelse på tyveri av liten verdi. I dag heter det mindre tyveri.'],
+['Juss','Skadeverk','Å ødelegge eller skade noe som tilhører andre.'],
+['Juss','Legitimasjon','Dokument som viser hvem du er. Vektere bærer tjenestebevis.'],
+['Vakthold','Vekter','Person som utfører vakttjeneste. Yrkestittelen etter fagbrev i sikkerhetsfaget.'],
+['Vakthold','Stasjonært vakthold','Vekter som er fast plassert på ett objekt.'],
+['Vakthold','Mobilt vakthold','Vekter som kjører mellom flere objekter og gjør inspeksjoner.'],
+['Vakthold','Utrykning','Vekter som rykker ut når en alarm er utløst.'],
+['Vakthold','Sentervekter','Vekter på kjøpesenter med ordens-, service- og sikkerhetsoppgaver.'],
+['Vakthold','Butikkontrollør','Sivilkledd eller uniformert vekter som forebygger og avdekker butikktyveri.'],
+['Vakthold','Ordensvakt','Vakt som holder ro og orden på serveringssteder og arrangementer.'],
+['Vakthold','Resepsjonsvekter','Vekter som bemanner resepsjon og håndterer besøkende og adgang.'],
+['Vakthold','Verditransport','Sikret transport av kontanter og verdisaker.'],
+['Vakthold','Alarmsentral','Bemannet sentral som mottar alarmer og setter i gang tiltak.'],
+['Vakthold','Egenvakthold','Vakthold virksomheten utfører selv med egne ansatte.'],
+['Vakthold','Oppdragsgiver','Kunden som har bestilt vakttjenesten.'],
+['Vakthold','Objekt','Bygget eller området som skal sikres.'],
+['Vakthold','Objektleder','Vekterens leder på det enkelte objektet.'],
+['Vakthold','Tjenesteinstruks','Dokument som beskriver oppgaver, rutiner og fullmakter på objektet.'],
+['Vakthold','Rundering','Planlagt runde på objektet for å kontrollere og observere.'],
+['Vakthold','Inspeksjon','Kontroll av et objekt, ofte utført av mobil vekter.'],
+['Vakthold','Åpne- og stengerunde','Faste kontroller når objektet åpnes og stenges.'],
+['Vakthold','Egensikkerhet','At du tar vare på egen sikkerhet før du går inn i en situasjon.'],
+['Vakthold','Situasjonsforståelse','Evnen til å oppfatte hva som skjer, forstå det og se hva som kan komme.'],
+['Vakthold','Signalement','Beskrivelse av en person: kjønn, alder, høyde, bygning, klær, særtrekk.'],
+['Vakthold','Samband','Radio eller telefon vekterne bruker for å holde kontakt.'],
+['Vakthold','Responstid','Tiden fra alarmen går til vekteren er på stedet.'],
+['Vakthold','Turnus','Arbeidsplan der arbeidstiden skifter mellom dag, kveld, natt og helg.'],
+['Vakthold','Leveransekvalitet','At tjenesten blir utført slik kontrakten og instruksen sier.'],
+['Vakthold','Sikkerhetsrevisjon','Systematisk kontroll av om sikkerhetsarbeidet følger krav og rutiner.'],
+['Vakthold','Fagbrev','Dokumentasjon på bestått fagprøve. I sikkerhetsfaget gir det yrkestittelen vekter.'],
+['Vakthold','Praksiskandidat','Voksen som går opp til fagprøven på grunnlag av lang praksis og bestått teorieksamen.'],
+['Teknisk sikring','Adgangskontroll','System som styrer hvem som kommer inn hvor og når, med kort, kode eller biometri.'],
+['Teknisk sikring','Skallsikring','Sikring av byggets ytterside: dører, vinduer, porter.'],
+['Teknisk sikring','Perimetersikring','Sikring av området rundt bygget: gjerde, port, lys, bom.'],
+['Teknisk sikring','Sonesikring','Inndeling av bygget i soner med ulike adgangsnivå.'],
+['Teknisk sikring','Barriere','Hindring som skal stoppe eller forsinke en uønsket hendelse.'],
+['Teknisk sikring','Innbruddsalarm (AIA)','Automatisk innbruddsalarmanlegg med detektorer og sentral.'],
+['Teknisk sikring','Brannalarmanlegg (ABA)','Automatisk brannalarmanlegg med detektorer, meldere og sentral.'],
+['Teknisk sikring','Kameraovervåking (ITV)','Fjernsynsovervåking av område. Kalles også CCTV eller TV-overvåking.'],
+['Teknisk sikring','Detektor','Føler som oppdager bevegelse, røyk, varme, glassbrudd eller åpning.'],
+['Teknisk sikring','Magnetkontakt','Detektor som melder når en dør eller et vindu åpnes.'],
+['Teknisk sikring','Overfallsalarm','Knapp eller sender som varsler alarmsentralen om trusler eller ran.'],
+['Teknisk sikring','Sabotasjealarm','Alarm som går når noen tukler med selve alarmanlegget.'],
+['Teknisk sikring','Tyverialarm (varesikring)','Brikker og antenner i butikk som varsler når umerket vare passerer.'],
+['Teknisk sikring','Nøkkelkontroll','Rutine for hvem som har hvilke nøkler og kort, og kvittering ved utlevering.'],
+['Teknisk sikring','Besøkskontroll','Registrering og følge av besøkende.'],
+['Teknisk sikring','Blindsone','Område som ikke dekkes av kamera eller detektor.'],
+['Teknisk sikring','Sluse','To dører etter hverandre der bare én kan være åpen om gangen.'],
+['Risiko','Risiko','Kombinasjon av sannsynlighet for en uønsket hendelse og konsekvensen av den.'],
+['Risiko','Risikovurdering','Samlet prosess for å finne, analysere og vurdere risiko.'],
+['Risiko','Risikoanalyse','Systematisk kartlegging av hva som kan gå galt, hvor sannsynlig det er og hva følgene blir.'],
+['Risiko','ROS-analyse','Risiko- og sårbarhetsanalyse.'],
+['Risiko','Risikomatrise','Tabell som viser risiko ut fra sannsynlighet og konsekvens, ofte med grønn, gul og rød.'],
+['Risiko','Sannsynlighet','Hvor trolig det er at hendelsen skjer.'],
+['Risiko','Konsekvens','Følgene av hendelsen for liv, helse, miljø, verdier og omdømme.'],
+['Risiko','Uønsket hendelse','Hendelse som kan gi skade på mennesker, miljø eller verdier.'],
+['Risiko','Verdi','Det som skal beskyttes: mennesker, materiell, informasjon, omdømme.'],
+['Risiko','Trussel','Mulig villet handling fra noen som kan og vil gjøre skade.'],
+['Risiko','Sårbarhet','Svakhet som gjør at en trussel eller fare kan gi skade.'],
+['Risiko','Fare','Kilde til mulig skade som ikke er villet, for eksempel glatt gulv.'],
+['Risiko','Akseptkriterier','Grensene virksomheten har satt for hvilken risiko den godtar.'],
+['Risiko','Restrisiko','Risikoen som står igjen etter at tiltak er satt inn.'],
+['Risiko','Forebyggende tiltak','Tiltak som senker sannsynligheten for hendelsen.'],
+['Risiko','Konsekvensreduserende tiltak','Tiltak som begrenser skaden når hendelsen skjer.'],
+['Risiko','Sikkerhetsbefaring','Fysisk gjennomgang av objektet for å finne svakheter.'],
+['Risiko','Sikringsplan','Plan med tiltak for å beskytte objektet, laget etter befaring og risikovurdering.'],
+['Risiko','NS 5814','Norsk standard med krav til risikovurderinger.'],
+['Risiko','NS 5832','Norsk standard for sikringsrisikoanalyse. Bygger på verdi, trussel og sårbarhet.'],
+['Risiko','Safety','Vern mot uhell og ulykker som ikke er villet.'],
+['Risiko','Security','Vern mot villede handlinger som tyveri, sabotasje og vold. Kalles sikring.'],
+['Risiko','Svinn','Varer som forsvinner på grunn av tyveri, feil eller ødeleggelse.'],
+['Risiko','Kritisk infrastruktur','Anlegg og systemer samfunnet ikke klarer seg uten, som strøm, vann, transport og ekom.'],
+['Risiko','Kritiske samfunnsfunksjoner','Oppgaver som må virke for å dekke befolkningens grunnleggende behov.'],
+['Risiko','Trusselbilde','Samlet beskrivelse av hvilke trusler som er aktuelle nå.'],
+['Beredskap','Beredskap','Det som er planlagt og forberedt for å håndtere uønskede hendelser.'],
+['Beredskap','Beredskapsplan','Plan som sier hvem som gjør hva, når og hvordan ved en hendelse.'],
+['Beredskap','Tiltakskort','Kort sjekkliste for én bestemt hendelse.'],
+['Beredskap','Varslingsliste','Liste over hvem som skal varsles, i hvilken rekkefølge.'],
+['Beredskap','Evakuering','Planlagt forflytning av mennesker ut av fare.'],
+['Beredskap','Møteplass','Avtalt sted der alle samles etter evakuering for opptelling.'],
+['Beredskap','PLIVO','Pågående livstruende vold. Nødetatenes felles prosedyre.'],
+['Beredskap','Nødetatene','Brann, politi og helse.'],
+['Beredskap','AMK','Akuttmedisinsk kommunikasjonssentral. Svarer på 113.'],
+['Beredskap','Innsatsleder','Politiets leder på et skadested.'],
+['Beredskap','Skadested','Stedet der en ulykke eller hendelse har skjedd.'],
+['Beredskap','Beredskapsøvelse','Trening på å bruke beredskapsplanen.'],
+['Beredskap','Skrivebordsøvelse','Øvelse der deltakerne snakker seg gjennom en tenkt hendelse.'],
+['Beredskap','Fullskalaøvelse','Øvelse der alle roller spilles ut i praksis.'],
+['Beredskap','Normalisering','Arbeidet med å komme tilbake til vanlig drift etter en hendelse.'],
+['Beredskap','Debrief','Gjennomgang etter en hendelse for å ta vare på de involverte og lære.'],
+['Brann','Branntrekanten','Brennbart materiale, oksygen og varme.'],
+['Brann','Brannklasse','Inndeling av branner etter hva som brenner: A, B, C, D og F.'],
+['Brann','Brannvernrunde','Fast kontrollrunde for å finne brannfarlige forhold.'],
+['Brann','Brannvernleder','Person i virksomheten som følger opp det daglige brannvernet.'],
+['Brann','Branninstruks','Kort instruks om hva alle skal gjøre ved brann.'],
+['Brann','Rømningsvei','Sikker vei ut av bygget ved brann.'],
+['Brann','Nødutgang','Utgang som bare skal brukes ved rømning.'],
+['Brann','Ledelys','Lysende skilt som viser vei til utgang.'],
+['Brann','Nødlys','Lys som tennes når strømmen går, slik at folk finner veien ut.'],
+['Brann','Branncelle','Del av bygget som er avgrenset med vegger og dører som holder brann ute en viss tid.'],
+['Brann','Branndør','Dør som skal hindre brann og røyk i å spre seg. Skal holdes lukket.'],
+['Brann','Brannsentral','Sentralen som viser hvilken detektor som har løst ut, og om anlegget har feil.'],
+['Brann','Manuell melder','Boks på veggen der du selv utløser brannalarmen.'],
+['Brann','Sprinkleranlegg','Automatisk slokkeanlegg som løser ut vann ved varme.'],
+['Brann','Slokkeapparat','Håndslokker med pulver, skum, CO₂ eller vann.'],
+['Brann','Husbrannslange','Fast montert slange med vann til førsteinnsats.'],
+['Brann','Brannteppe','Teppe som kveler små branner.'],
+['Brann','Overtenning','Når alt brennbart i rommet antennes nesten samtidig.'],
+['Brann','Røykgass','Giftig og brennbar gass fra brann. Den vanligste dødsårsaken ved brann.'],
+['Brann','Varme arbeider','Arbeid med åpen flamme eller gnister, som sveising. Krever sertifikat og brannvakt.'],
+['Brann','Brannvakt','Person som overvåker under og etter varme arbeider eller når alarmanlegg er ute av drift.'],
+['HMS','HMS','Helse, miljø og sikkerhet.'],
+['HMS','Internkontroll','Systematiske tiltak som sikrer at virksomheten følger HMS-lovgivningen.'],
+['HMS','Internkontrollforskriften','Forskriften som pålegger alle virksomheter systematisk HMS-arbeid.'],
+['HMS','Arbeidsmiljøloven','Loven om arbeidsmiljø, arbeidstid og stillingsvern.'],
+['HMS','Verneombud','Arbeidstakernes valgte representant i arbeidsmiljøspørsmål.'],
+['HMS','Arbeidsmiljøutvalg (AMU)','Utvalg med representanter for arbeidsgiver og arbeidstakere. Påbudt fra 30 arbeidstakere.'],
+['HMS','Bedriftshelsetjeneste (BHT)','Fagfolk som rådgir om forebyggende arbeidsmiljøarbeid.'],
+['HMS','Arbeidstilsynet','Myndigheten som fører tilsyn med arbeidsmiljøloven.'],
+['HMS','Avvik','Brudd på lov, forskrift, instruks eller rutine.'],
+['HMS','Avviksbehandling','Melde, rette, finne årsak og forebygge gjentakelse.'],
+['HMS','Nestenulykke','Hendelse som kunne ha gitt skade, men ikke gjorde det.'],
+['HMS','Vernerunde','Planlagt gjennomgang av arbeidsplassen for å finne farer.'],
+['HMS','Sikker jobbanalyse (SJA)','Kort gjennomgang av farer og tiltak før en risikofylt arbeidsoppgave.'],
+['HMS','Verneutstyr','Personlig utstyr som beskytter mot skade, som hansker og vernesko.'],
+['HMS','Medvirkningsplikt','Arbeidstakers plikt til å delta i HMS-arbeidet og følge instrukser.'],
+['HMS','Varsling','Å si fra om kritikkverdige forhold i virksomheten.'],
+['HMS','Psykososialt arbeidsmiljø','Hvordan samarbeid, ledelse og belastninger påvirker de ansatte.'],
+['HMS','Ergonomi','Tilpasning av arbeidet til kroppen for å unngå belastningsskader.'],
+['HMS','Tillitsvalgt','Arbeidstakernes valgte representant i lønns- og arbeidsvilkår.'],
+['HMS','Tariffavtale','Avtale mellom fagforening og arbeidsgiver om lønn og arbeidsvilkår.'],
+['HMS','Sikkerhetskultur','Holdningene og vanene som avgjør hvordan folk faktisk opptrer når det gjelder sikkerhet.'],
+['Førstehjelp','HLR','Hjerte-lunge-redning: 30 brystkompresjoner og 2 innblåsinger.'],
+['Førstehjelp','BHLR','Basal hjerte-lunge-redning, uten utstyr.'],
+['Førstehjelp','DHLR','Hjerte-lunge-redning med defibrillator (hjertestarter).'],
+['Førstehjelp','Hjertestarter','Apparat som analyserer hjerterytmen og gir støt ved behov. Kalles også AED.'],
+['Førstehjelp','Sideleie','Stilling for bevisstløse som puster normalt. Holder luftveien fri.'],
+['Førstehjelp','Frie luftveier','At luft kommer uhindret ned i lungene. Sikres ved å bøye hodet bakover og løfte haken.'],
+['Førstehjelp','Sirkulasjonssvikt','Tilstand der kroppen ikke får nok blod rundt. Blek, kald og klam hud og rask puls.'],
+['Førstehjelp','Trykkbandasje','Bandasje som presser mot såret for å stanse blødning.'],
+['Førstehjelp','Emosjonell førstehjelp','Å roe, trygge og bli hos en person som er redd eller i sjokk etter en hendelse.'],
+['Førstehjelp','Akutthjelper','Person med opplæring som kan gi hjelp til ambulansen kommer.'],
+['Rapport','Vaktjournal','Fortløpende logg over det som skjer i løpet av vakten.'],
+['Rapport','Hendelsesrapport','Rapport om én uønsket hendelse.'],
+['Rapport','Avviksrapport','Rapport om brudd på rutine eller krav.'],
+['Rapport','Skaderapport','Rapport om skade på person eller materiell.'],
+['Rapport','Observasjon','Det du selv så, hørte eller luktet.'],
+['Rapport','Vurdering','Det du mener eller tror ut fra observasjonene.'],
+['Rapport','Vitne','Person som har sett eller hørt hendelsen.'],
+['Rapport','Fornærmede','Den lovbruddet har gått ut over.'],
+['Rapport','Bevissikring','Å ta vare på gjenstander, opptak og opplysninger slik at politiet kan bruke dem.'],
+['Rapport','Anmeldelse','Melding til politiet om et straffbart forhold.'],
+['Rapport','Kildekritikk','Å vurdere hvor pålitelig en opplysning er før du bruker den.'],
+['Rapport','Konfidensialitet','At opplysninger bare er tilgjengelige for dem som skal ha dem.'],
+['Rapport','Informasjonssikkerhet','Vern av opplysningers konfidensialitet, integritet og tilgjengelighet.']
+];
+
+/* Case: w = arbeidssted eller 'alle'. pts = det en god besvarelse bør ha med. */
+var CS=[
+{w:'kjopesenter',t:'Krangel utenfor butikk',s:'Du går runde på {sted} en lørdag ettermiddag. To menn krangler høylytt utenfor en klesbutikk. Den ene dytter den andre i brystet. Flere kunder har stoppet for å se.',tk:['Beskriv steg for steg hva du gjør. Bruk fagbegreper.','Hvilke hjemler er aktuelle hvis det utvikler seg til slåssing?','Hva skriver du i rapporten etterpå?'],pts:['Vurderer egensikkerhet og melder fra på samband før du går inn','Starter med tilstedeværelse og dialog, og skiller partene','Rolig stemme, avstand, jeg-budskap, gir valg','Bortvisning bygger på eierens råderett','Fysisk inngrep bare ved nødverge eller lovlig pågripelse, og ikke lenger enn nødvendig','Tilkaller politi hvis det blir vold','Rapport: hvem, hva, hvor, når, hvordan, vitner, saklig']},
+{w:'kjopesenter',t:'Heisstans med barn',s:'Heisen på {sted} har stoppet mellom to etasjer. Tre personer står inne, blant dem et barn som gråter. Det er lørdag og fullt av folk.',tk:['Hva gjør du først?','Hvem varsler du, og i hvilken rekkefølge?','Hvordan snakker du med dem som står fast?'],pts:['Oppretter kontakt med de innestengte og blir der','Spør om noen er skadd eller syke, ringer 113 ved behov','Varsler heisfirma eller vaktmester etter tiltakskortet, og objektleder','Prøver ikke å åpne heisdørene selv','Beroliger, gir jevnlig informasjon om hva som skjer og hvor lenge','Holder publikum unna og loggfører tidspunkter','Skriver rapport etterpå']},
+{w:'kjopesenter',t:'Tyveri fra butikk',s:'En butikkansatt på {sted} kommer løpende og sier at en mann nettopp gikk ut av butikken med en jakke til 2000 kroner uten å betale. Mannen går rolig mot utgangen.',tk:['Hvilke hjemler har du for å gripe inn?','Beskriv framgangsmåten.','Hva gjør du hvis mannen nekter å stoppe?'],pts:['Avklarer hva den ansatte selv har sett (fersk gjerning)','Tar kontakt rolig og ber mannen bli med tilbake','Selvtekt: varen kan tas tilbake når krenkelsen er åpenbar','Pågripelse etter strpl. § 176 krever at vilkårene er oppfylt, og politiet varsles straks','Forholdsmessighet: ikke bruk mer makt enn saken tilsier','Nekter han: observer, noter signalement, sikre kameraopptak, ring politiet','Rapport og bevissikring']},
+{w:'kjopesenter',t:'Brannalarm i åpningstiden',s:'Brannalarmen går på {sted} klokken 14.30 en vanlig tirsdag. Du ser ingen røyk fra der du står.',tk:['Hva gjør du de første minuttene?','Beskriv evakueringen.','Hva gjør du når brannvesenet har gitt klarsignal?'],pts:['Leser av brannsentralen for å finne utløst detektor','Følger branninstruksen og behandler alarmen som reell til annet er avklart','Varsler 110 hvis det ikke skjer automatisk','Leder publikum ut via rømningsveier til møteplass, heis brukes ikke','Møter brannvesenet og gir informasjon og nøkler','Ingen slipper inn igjen før brannvesenet sier det','Rapport, og avvik hvis noe ikke virket']},
+{w:'kjopesenter',t:'Eldre mann faller om',s:'En eldre mann faller om foran apoteket på {sted}. Han reagerer ikke når du snakker til ham.',tk:['Hva gjør du først?','Beskriv førstehjelpen.','Hvordan organiserer du stedet?'],pts:['Sjekker bevissthet og roper på hjelp','Ringer 113 med høyttaler','Åpner luftveien og sjekker pust i inntil 10 sekunder','Puster normalt: sideleie. Puster ikke normalt: HLR 30:2','Sender noen etter hjertestarter','Skjermer pasienten og fordeler oppgaver til folk rundt','Møter ambulansen, gir kort rapport, skriver hendelsesrapport']},
+{w:'kjopesenter',t:'Ungdomsgjeng ved inngangen',s:'En gruppe på seks ungdommer har stått lenge ved hovedinngangen til {sted}. De roper etter kunder, og én av dem virker beruset. En butikksjef ber deg «få dem vekk».',tk:['Hvordan går du fram?','Hva gir deg rett til å be dem gå?','Hva gjør du med den som virker beruset?'],pts:['Tar kontakt rolig, finner en å snakke med i gruppen','Forklarer ordensreglene og hva som forventes','Bortvisning bygger på eierens råderett, ikke på makt','Behandler dem med respekt og likt, uten å provosere','Vurderer om den berusede trenger hjelp eller foresatte, 113 ved nedsatt bevissthet','Tilkaller bistand eller politi hvis de nekter og det blir uro','Loggfører hendelsen']},
+{w:'sykehus',t:'Truende pasient i akuttmottaket',s:'En mann i akuttmottaket på {sted} reiser seg, roper og truer en sykepleier. Han virker ruspåvirket.',tk:['Hvordan vurderer du situasjonen?','Beskriv hva du gjør.','Når kan du bruke fysisk makt?'],pts:['Egensikkerhet, melder på samband, får oversikt over hvem som er i fare','Går mellom mannen og personalet på avstand','Korte, rolige beskjeder og tid','Samarbeider med helsepersonellet, som har ansvaret for pasienten','Fysisk inngrep bare ved nødverge eller nødrett, og ikke lenger enn nødvendig','Tilkaller politi ved vold eller alvorlige trusler','Rapport, og oppfølging av den ansatte']},
+{w:'sykehus',t:'Ukjent person på lukket avdeling',s:'Under nattevakt på {sted} ser du en mann uten synlig ID-kort prøve dørene inn til en avdeling med adgangskontroll.',tk:['Hva gjør du?','Hvilke sikkerhetstiltak er relevante her?','Skriv en kort observasjonsrapport.'],pts:['Tar kontakt, presenterer deg og spør hva han skal','Ber om legitimasjon eller hvem han besøker','Uten ærend: bortvisning på vegne av eier','Sjekker om han har kommet inn noe sted, og varsler avdelingen','Tiltak: adgangskontroll, besøksrutiner, synlige ID-kort, kamera','Rapport med signalement, tid, sted og hva som ble sagt','Skiller observasjon fra vurdering']},
+{w:'sykehus',t:'Pårørende i krise',s:'En kvinne får ikke komme inn til moren sin på intensivavdelingen på {sted} utenom besøkstid. Hun gråter, roper og slår i skranken.',tk:['Hvordan demper du situasjonen?','Hva sier du, helt konkret?','Når tilkaller du hjelp?'],pts:['Ser på henne som et menneske i krise, ikke som en trussel','Lytter ferdig og bekrefter følelsen','Rolig stemme, avstand, tar samtalen bort fra andre','Henter personalet som kan gi informasjon og avgjøre besøk','Gir realistiske valg','Tilkaller bistand hvis hun truer eller skader noen','Loggfører']},
+{w:'kontor',t:'Pakke uten avsender',s:'Du finner en pakke uten adresse og avsender bak en sofa i resepsjonen på {sted}. Ingen av de ansatte kjenner den igjen.',tk:['Hva gjør du med en gang?','Hvem varsler du?','Hvilke deler av beredskapsplanen bruker du?'],pts:['Rører og flytter den ikke','Holder folk unna og sperrer området','Spør raskt rundt om noen eier den','Varsler etter tiltakskortet: leder og politi (112)','Forbereder evakuering etter planen','Noterer utseende, plassering, tid og hvem som fant den','Sikrer kameraopptak og skriver rapport']},
+{w:'kontor',t:'Besøkende uten avtale',s:'En mann i resepsjonen på {sted} krever å få snakke med en navngitt ansatt. Han har ingen avtale, og den ansatte sier på telefon at hun ikke vil møte ham. Mannen hever stemmen.',tk:['Hvordan håndterer du ham?','Hva gir deg rett til å nekte ham adgang?','Hva dokumenterer du?'],pts:['Rolig og høflig, forklarer besøksrutinen','Gir ikke ut opplysninger om den ansatte','Eierens råderett gir grunnlag for å nekte adgang og bortvise','Tilbyr å ta imot en beskjed','Tilkaller bistand eller politi ved trusler','Varsler den ansatte og leder, vurderer følge til bil','Rapport med signalement og ordrett det som ble sagt']},
+{w:'kontor',t:'Dør med adgangskontroll står åpen',s:'På kveldsrunden på {sted} finner du døren til serverrommet stående på gløtt med en papirbit i låsen.',tk:['Hva gjør du?','Hva slags hendelse er dette?','Hvilke tiltak foreslår du?'],pts:['Vurderer egensikkerhet før du går inn, melder på samband','Sjekker rommet eller venter på bistand','Rører minst mulig, tenker bevissikring','Dette er et sikkerhetsavvik og mulig forsøk på uautorisert adgang','Sikrer døren og varsler oppdragsgiver etter instruks','Foreslår tiltak: døralarm, logggjennomgang, opplæring, kamera','Skriver avviksrapport']},
+{w:'event',t:'Beruset gjest ved inngangen',s:'Du står i døren på {sted}. En mann som er tydelig beruset vil inn. Han har billett og blir sint når du stopper ham.',tk:['Hva sier og gjør du?','Hva gir deg rett til å nekte ham?','Hva gjør du hvis han blir stående og krangle?'],pts:['Rolig og tydelig beskjed, uten å krenke','Arrangørens regler og råderett gir grunnlag for å nekte adgang','Gir et valg, for eksempel å komme tilbake senere eller refusjon etter arrangørens regler','Holder avstand og har kollega i nærheten','Vurderer om han klarer seg selv eller trenger hjelp','Politi tilkalles hvis han nekter å gå og lager uro','Loggfører']},
+{w:'event',t:'Slåsskamp i publikum',s:'Midt under en konsert på {sted} bryter det ut slåssing mellom to grupper, til sammen åtte personer.',tk:['Hva gjør du først?','Hvem varsler du?','Hva er vekterens rolle til politiet kommer?'],pts:['Går ikke inn alene, egensikkerhet','Melder på samband: sted, antall, behov for bistand','Politiet varsles (112), helse ved skadde (113)','Skjermer og flytter publikum rundt','Griper inn fysisk bare med nok folk og med hjemmel i nødverge eller pågripelse','Gir førstehjelp og tar vare på skadde','Noterer signalement og sikrer vitner, skriver rapport']},
+{w:'event',t:'Trengsel foran scenen',s:'På {sted} presser publikum seg fram mot scenen. Flere foran roper at de ikke får puste.',tk:['Hva gjør du med en gang?','Hvem må få beskjed?','Hva kunne vært gjort på forhånd?'],pts:['Melder straks til sikkerhetsleder på samband','Får stanset musikken og gitt beskjed fra scenen','Hjelper folk ut over sceneskranken','Åpner trykket bakfra, stanser innslipp','113 ved skadde, førstehjelp','Forebygging: risikovurdering, soneinndeling, bølgebrytere, antallskontroll','Rapport og evaluering']},
+{w:'industri',t:'Blokkert nødutgang på lager',s:'På befaring på {sted} ser du at en nødutgang er sperret av paller, og at et slokkeapparat mangler fra braketten.',tk:['Hva gjør du på stedet?','Hvem melder du til?','Skriv en kort avviksrapport.'],pts:['Får pallene flyttet med en gang hvis mulig','Forklarer hvorfor: rømningsvei skal være fri','Melder avvik skriftlig til brannvernleder eller oppdragsgiver','Slokkeapparatet må erstattes','Avviksrapport: hva, hvor, når, risiko, strakstiltak, forslag til varig tiltak','Følger opp på neste runde','Kobler til internkontroll og brannvernrunde']},
+{w:'industri',t:'Fall fra stige',s:'En lagerarbeider på {sted} har falt fra en stige og ligger på gulvet. Han er våken, men har vondt i ryggen og kjenner dårlig i beina.',tk:['Hva gjør du?','Hvem varsler du?','Hva skal dokumenteres?'],pts:['Sikrer stedet, stopper trucktrafikk','Ringer 113','Lar ham ligge i ro og flytter ham ikke ved mistanke om ryggskade','Holder ham varm, snakker med ham, følger med på pust og bevissthet','Varsler arbeidsgiver. Alvorlig arbeidsulykke skal meldes til Arbeidstilsynet og politiet av arbeidsgiver','Sikrer ulykkesstedet','Skaderapport og avvik']},
+{w:'industri',t:'Sjåfør uten papirer i porten',s:'En lastebil står i porten til {sted} klokken 02.00. Sjåføren har ikke leveringsdokumenter og er ikke på listen din.',tk:['Hva gjør du?','Hvilken risiko vurderer du?','Hva loggfører du?'],pts:['Følger instruksen: ingen adgang uten avklaring','Høflig og bestemt, ber om legitimasjon','Ringer kontaktperson hos oppdragsgiver','Risiko: tyveri, uautorisert adgang, sosial manipulering','Lar bilen vente utenfor porten','Loggfører registreringsnummer, firma, navn og tid','Avvik hvis rutinen ikke dekker situasjonen']},
+{w:'mobil',t:'Knust rute på nattinspeksjon',s:'På inspeksjon på {sted} klokken 03.00 finner du en knust rute i et næringsbygg. Du hører lyder inne.',tk:['Hva gjør du?','Hvilke hjemler har du hvis noen kommer ut?','Hvordan tar du vare på egen sikkerhet?'],pts:['Går ikke inn alene','Melder til alarmsentralen og ringer politiet (112)','Observerer fra trygg avstand, noterer signalement og kjøretøy','Pågripelse etter § 176 er mulig ved fersk gjerning, men egensikkerhet går først','Nødverge hvis du blir angrepet','Sikrer åstedet og rører minst mulig','Rapport og varsling av oppdragsgiver']},
+{w:'mobil',t:'Alarm og åpen dør',s:'Du rykker ut til en innbruddsalarm på {sted}. Bakdøren står åpen, og det er mørkt inne. Ingen biler i nærheten.',tk:['Hvordan går du fram?','Hva melder du til alarmsentralen?','Hva gjør du når stedet er avklart?'],pts:['Stopper og observerer før du går fram','Melder ankomst og det du ser','Vurderer bistand eller politi før du går inn','Sjekker for brytemerker','Søker gjennom systematisk hvis det vurderes trygt','Sikrer bygget og kontakter oppdragsgiver','Rapport med tider, funn og tiltak']},
+{w:'mobil',t:'Person sover i trappeoppgang',s:'På runden på {sted} finner du en mann som sover i en trappeoppgang. Det er kuldegrader ute.',tk:['Hva gjør du?','Hvilke hensyn veier du mot hverandre?','Når ringer du 113?'],pts:['Vekker ham forsiktig og på avstand','Sjekker om han er syk, skadd eller nedkjølt','113 hvis han er vanskelig å vekke eller forvirret','Respekt og verdighet, han er i en sårbar situasjon','Eier kan be ham forlate stedet, men du vurderer faren ved kulden','Kontakter politi eller hjelpeapparat ved behov','Loggfører']},
+{w:'transport',t:'Forlatt koffert i avgangshallen',s:'En koffert har stått alene i hallen på {sted} i over 30 minutter. Ingen i nærheten vil kjennes ved den.',tk:['Beskriv hva du gjør.','Hvem informerer du?','Når evakuerer du?'],pts:['Rører ikke kofferten','Spør rundt og etterlyser eier','Holder avstand og sperrer','Melder til operasjonssentral og politi etter tiltakskort','Evakuering besluttes etter plan, i samråd med politiet','Noterer utseende, plassering og tid, sikrer kameraopptak','Rapport']},
+{w:'transport',t:'Passasjer uten billett',s:'På {sted} nekter en passasjer å vise billett og prøver å presse seg forbi deg.',tk:['Hvordan håndterer du det?','Hva har du lov til?','Hva gjør du hvis han dytter deg?'],pts:['Rolig, tydelig, forklarer reglene','Følger selskapets instruks for billettkontroll','Kan nekte videre reise og be ham gå på vegne av selskapet','Makt bare med hjemmel','Dytt er et angrep: nødverge, ikke lenger enn nødvendig','Tilkaller bistand eller politi','Rapport']},
+{w:'skole',t:'Melding om trussel',s:'En elev på {sted} forteller deg i friminuttet at en medelev har sagt han skal «ta» en navngitt lærer i morgen.',tk:['Hva gjør du med opplysningen?','Hvem varsler du?','Hvordan behandler du eleven som sa fra?'],pts:['Tar det på alvor og noterer ordrett','Varsler rektor eller skolens ledelse straks','Skolen vurderer politi, og 112 ved akutt fare','Konfronterer ikke eleven selv','Tar vare på den som varslet, taushet om hvem det var','Følger skolens beredskapsplan','Rapport']},
+{w:'skole',t:'Ukjent voksen i skolegården',s:'En voksen mann du ikke kjenner går rundt i skolegården på {sted} i skoletiden og snakker med elevene.',tk:['Hva gjør du?','Hva gir deg rett til å be ham gå?','Hva melder du videre?'],pts:['Tar kontakt, presenterer deg og spør om ærend','Viser ham til administrasjonen','Uten ærend: bortvisning på vegne av skolen','Holder ham under oppsikt til han har gått','Varsler ledelsen, politi ved urovekkende atferd','Signalement og tidspunkt i logg','Foreslår tiltak: besøksrutine, skilting']},
+{w:'alle',t:'Vil ikke gå ved stengetid',s:'Det er stengetid på {sted}. En mann nekter å gå, setter seg ned og kaller deg stygge ting.',tk:['Beskriv steg for steg hva du gjør.','Hvilke hjemler har du?','Når ringer du politiet?'],pts:['Rolig, ignorerer skjellsordene','Forklarer at stedet stenger og hva som skjer videre','Gir tid og et valg','Bortvisning bygger på eierens råderett','Bruker ikke makt bare fordi han sitter','Ringer politiet når han fortsatt nekter','Loggfører']},
+{w:'alle',t:'Strømbrudd på kveldsvakt',s:'Strømmen går på {sted}. Nødlysene slår seg på. Folk blir urolige, og noen bruker mobillykt.',tk:['Hva gjør du først?','Hvordan informerer du folk?','Hvilke rutiner setter du i gang?'],pts:['Skaffer oversikt: er noen i heis, er noen skadd?','Rolig og tydelig informasjon','Følger tiltakskort for strømbrudd','Varsler teknisk vakt og oppdragsgiver','Sjekker alarmanlegg, adgangskontroll og dører','Vurderer evakuering hvis det varer','Loggfører og skriver rapport']},
+{w:'alle',t:'Kollega bryter instruksen',s:'Du ser at en kollega på {sted} slipper inn en bekjent bakveien utenom adgangskontrollen, og ber deg ikke si noe.',tk:['Hva gjør du?','Hvilke verdier står mot hverandre?','Hvordan melder du fra?'],pts:['Det er et brudd på instruks og et sikkerhetsavvik','Sier fra til kollegaen direkte','Melder til leder eller i avvikssystemet','Lojalitet til oppdrag og sikkerhet går foran lojalitet til kollega','Saklig, det du så, uten å dømme','Retten til å varsle, og taushetsplikt utad','Forslag til tiltak']}
+];
+
+var KM=['Gjøre rede for hva som kan true kritiske samfunnsfunksjoner og infrastruktur, og foreslå tiltak','Reflektere over sikkerhet og trygghet i samfunnet, og samhandlingen mellom myndigheter og sikkerhetsbransjen','Planlegge og gjennomføre risikoanalyser etter gjeldende standarder, og presentere sikkerhetstjenester og -produkter','Planlegge, gjennomføre og vurdere tiltak mot brannrisiko etter regelverket','Utvikle enkle beredskapsplaner og planlegge, gjennomføre og vurdere øvelser','Planlegge og gjennomføre sikkerhetsbefaringer og lage sikringsplaner','Gjøre rede for typer identitetsbevis og undersøke sikkerhetselementene i dem','Beskrive og dokumentere observasjoner, egne aktiviteter og hendelser','Reflektere over egen maktposisjon, også i møte med sårbare grupper','Reflektere over hva som påvirker samspillet mellom mennesker i ulike livssituasjoner','Forklare hvordan kulturforskjeller kan prege arbeidssituasjoner, og ta hensyn til det','Vurdere konfliktrisiko og forebygge og håndtere konflikter','Undersøke og bruke hjelpemidler og verktøy i sikkerhetsarbeidet','Gi førstehjelp og omsorg ved akutt sykdom og skade','Gjøre rede for symptomer på rus og sette inn tiltak overfor ruspåvirkede','Lede et skadested til nødetatene overtar','Reflektere over hva god service betyr i sikkerhetsarbeid','Presentere sikkerhetstjenester og -produkter tilpasset kundens behov','Utvikle og vurdere tilbud på sikkerhetsoppdrag','Utføre sikkerhetstjenester i samsvar med lover, forskrifter og krav til kvalitet','Planlegge, utføre og dokumentere leveranser og bidra i sikkerhetsrevisjoner','Undersøke HMS-forhold, bruke regelverket og gjøre rede for egen rolle','Utvikle og vurdere opplæringsplaner og tjenesteinstrukser, og gi opplæring','Lage enkle turnusplaner etter lov og avtaleverk','Arbeide etter regelverk og avtaler for arbeidsforholdet, og kjenne plikter og rettigheter','Reflektere over yrkesetiske retningslinjer og bruke dem','Undersøke og gjøre rede for sikkerhetskulturen i en virksomhet','Arbeide etter bedriftens etiske regler og oppdragsgivers krav til informasjonssikkerhet'];
+
+var CSH=[
+['Nødnumre','<strong>110</strong> brann · <strong>112</strong> politi · <strong>113</strong> medisinsk nødhjelp<br>116 117 legevakt · 02800 politi når det ikke haster · 22 59 13 00 Giftinformasjonen'],
+['Fire paragrafer','<strong>Strl. § 17 nødrett</strong>: redde liv, helse, eiendom fra fare som ikke kan avverges på annen rimelig måte.<br><strong>Strl. § 18 nødverge</strong>: avverge ulovlig angrep, ikke lenger enn nødvendig.<br><strong>Strl. § 19 selvtekt</strong>: gjenopprette ulovlig endret tilstand når det er urimelig å vente på myndighetene.<br><strong>Strpl. § 176</strong>: enhver kan pågripe ved fersk gjerning eller ferske spor, og skal straks overgi til politiet.'],
+['Trappe opp, ikke hoppe','Tilstedeværelse → dialog → tydelig beskjed → bortvisning → politi → fysisk inngrep bare med hjemmel.'],
+['Risiko','Sannsynlighet × konsekvens. Forebyggende tiltak senker sannsynligheten. Konsekvensreduserende tiltak begrenser skaden. NS 5832: verdi, trussel, sårbarhet.'],
+['Brann','Branntrekanten: brennbart, oksygen, varme. Redde, varsle, slokke. Aldri vann på fett eller strøm. Klasser: A fast, B væske, C gass, D metall, F fett.'],
+['Førstehjelp','Puster normalt: sideleie. Puster ikke normalt: 113, HLR 30:2, hjertestarter. Kompresjoner 5–6 cm, 100–120 i minuttet.'],
+['Beredskapsplan','Hendelser, varslingsliste, roller, tiltakskort, evakuering og møteplass, informasjon, ressurser, evaluering.'],
+['HMS','Arbeidsgiver har ansvaret. Verneombud i alle virksomheter (unntak kan avtales under 5). AMU fra 30. Avvik: melde, rette, finne årsak, forebygge.'],
+['Rapport','Hvem, hva, hvor, når, hvordan, vitner. Saklig. Skill observasjon fra vurdering.'],
+['Fagprøven','Planlegging, gjennomføring, egenvurdering, dokumentasjon.']
+];
+
+var FPC='<div class="cd"><p>Fagprøven er praktisk. Prøvenemnda lager oppgaven, ofte knyttet til din egen arbeidsplass, og vurderer fire deler. Fylkeskommunen der du er oppmeldt har egne skjema og tidsrammer, så les informasjonen du får derfra.</p></div>'+
+'<div class="cd"><h3>1. Planlegging</h3><ul><li>Lag en skriftlig plan med framdrift og tidsbruk</li><li>Begrunn valgene dine faglig</li><li>Ta med HMS, risikovurdering og hvilke hjelpemidler du trenger</li></ul><h3>2. Gjennomføring</h3><ul><li>Gjør arbeidet slik du har planlagt</li><li>Avviker du fra planen, forklar hvorfor</li><li>Vis at du jobber selvstendig, sikkert og med god service</li></ul><h3>3. Egenvurdering</h3><ul><li>Hva gikk bra, og hva ville du gjort annerledes?</li><li>Vær ærlig. Å se egne feil teller positivt</li></ul><h3>4. Dokumentasjon</h3><ul><li>Risikovurdering, instruks, rapporter, skisser</li><li>Bruk fagbegreper riktig</li><li>Ryddig og lett å finne fram i</li></ul></div>'+
+'<div class="cd"><h3>Hva skiller karakterene?</h3><p><strong>Bestått meget godt</strong>: du forstår, vurderer og reflekterer, og jobber selvstendig.</p><p class="mt6"><strong>Bestått</strong>: du kan bruke kunnskapen, gjøre rede for og forklare.</p><p class="mt6"><strong>Ikke bestått</strong>: du gjengir og gjentar, og det avdekkes grunnleggende mangler.</p></div>'+
+'<div class="cd"><h3>Forberedelser</h3><ul><li>Les læreplanen SIK03-02 og huk av målene i denne appen</li><li>Lag en risikovurdering og en enkel beredskapsplan for eget objekt på forhånd, som øving</li><li>Øv på å forklare hvorfor du gjør ting, ikke bare hva</li><li>Ha lovene tilgjengelig og vit hvor du finner fram</li><li>Regn med en fagsamtale der nemnda spør om valgene dine</li></ul></div>';
+
+/* ---------- AI (valgfritt, virker bare der siden får lov) ---------- */
+var AI=null;
+function aiUI(){var b=$('aiCaseBox');if(b)b.style.display=AI?'':'none';var els=document.querySelectorAll('.ai-only');for(var i=0;i<els.length;i++)els[i].style.display=AI?'':'none'}
+function aiOff(e){if(e&&e.code==='not_granted'){AI=null;aiUI()}}
+function parseJ(t){try{var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<0)return null;return JSON.parse(t.slice(a,b+1))}catch(e){return null}}
+
+/* ---------- oppstart ---------- */
+function fillWP(sel,val){var h='';for(var k in WP)h+='<option value="'+k+'">'+WP[k][0]+'</option>';sel.innerHTML=h;if(val)sel.value=val}
+function boot(){
+  var n=$('iN').value.trim();
+  if(!n){$('oErr').textContent='Skriv inn navnet ditt.';return}
+  U.name=n;U.wp=$('iW').value;U.sted=$('iS').value.trim();U.goal=$('iG').value;$('oErr').textContent='Lagrer …';
+  SB.from('profiles').update({name:U.name,wp:U.wp,sted:U.sted,goal:U.goal}).eq('id',UID).then(function(r){if(r.error){$('oErr').textContent='Kunne ikke lagre profilen. Prøv igjen.';return}$('oErr').textContent='';run()},function(){$('oErr').textContent='Ingen kontakt med serveren. Prøv igjen.'});
+}
+function editProfile(){show('onb');$('iN').value=U.name;$('iW').value=U.wp;$('iS').value=U.sted||'';$('iG').value=U.goal}
+var NAV=[['hjem','Hjem','<path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-7H9v7H4a1 1 0 01-1-1z"/>'],['lar','Lær','<path d="M2 4h7a3 3 0 013 3v13a2 2 0 00-2-2H2zM22 4h-7a3 3 0 00-3 3v13a2 2 0 012-2h8z"/>'],['exam','Eksamen','<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-6"/>'],['kort','Kort','<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>'],['score','Klar?','<path d="M3 12h4l3 8 4-16 3 8h4"/>'],['ordbok','Ordbok','<path d="M5 3h14v18H5zM9 8h6M9 12h6"/>'],['mer','Mer','<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>']];
+function run(){
+  show('shell');
+  $('nav').innerHTML=NAV.map(function(n){return '<button class="ni" data-s="'+n[0]+'" onclick="go(\''+n[0]+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+n[2]+'</svg><span>'+n[1]+'</span></button>'}).join('');
+  var t=today();if(P.ld!==t){P.str=(P.ld===t-1)?P.str+1:1;P.ld=t;save()}
+  var h='<option value="all">Alle temaer</option>';for(var k in TN)h+='<option value="'+k+'">'+TN[k]+'</option>';$('eTpc').innerHTML=h;
+  fillWP($('eW'),U.wp);$('eS').value=U.sted||'';
+  rTopics();rDeckSel();rGLcats();rGL();rCS();$('fpC').innerHTML=FPC;rKM();go('hjem');aiUI();
+}
+function go(s){
+  var secs=document.querySelectorAll('.sec');for(var i=0;i<secs.length;i++)secs[i].classList.remove('on');
+  $('s-'+s).classList.add('on');
+  var top={opps:'mer',fagp:'mer',komp:'mer',vilkar:'mer'}[s]||s;
+  var nis=document.querySelectorAll('.ni');for(var j=0;j<nis.length;j++)nis[j].classList.toggle('on',nis[j].getAttribute('data-s')===top);
+  $('ms').scrollTop=0;
+  if(s==='hjem')rHome();if(s==='exam')resetE();if(s==='score')rScore();if(s==='kort')srStart();if(s==='lar')clT();if(s==='mer')rMer();
+}
+
+/* ---------- hjem ---------- */
+function recent(n){return P.ans.slice(-n)}
+function pct(a){if(!a.length)return null;var c=0;for(var i=0;i<a.length;i++)c+=a[i].ok;return Math.round(c/a.length*100)}
+function rHome(){
+  var h=new Date().getHours();var g=h<5?'God natt':h<10?'God morgen':h<17?'Hei':'God kveld';
+  $('greet').textContent=g+', '+U.name;
+  $('gsub').textContent={eksamen:'Du øver til skriftlig eksamen.',fagprove:'Du øver til fagprøven.',begge:'Du øver til eksamen og fagprøve.',grunn:'Du øver til vekterutdanningen.'}[U.goal]||'';
+  $('strk').textContent=P.str+(P.str===1?' dag':' dager')+' på rad';
+  $('uBtn').textContent=U.name;
+  var r=pct(recent(60));
+  $('xA').textContent=P.ans.length;$('xP').textContent=r===null?'–':r+'%';
+  var c=srCounts('all');$('xK').textContent=srGot();$('xD').textContent=c.due;
+  var rec;
+  if(P.td.length<T.length)rec='Les temaene under Lær. Du har '+(T.length-P.td.length)+' igjen.';
+  else if(P.ans.length<40)rec='Ta flere flervalgsrunder. Du trenger minst 40 svar før tallene sier noe.';
+  else if(!P.cases.length)rec='Skriv en caseoppgave. Eksamen handler mest om å forklare, ikke å krysse av.';
+  else if(c.due>0)rec='Du har '+c.due+' kort til repetisjon i dag.';
+  else rec='Ta en blandet runde på 20 oppgaver med tidsbegrensning.';
+  $('rec').textContent=rec;
+  var w=[];for(var k in TN){var s=P.ts[k];if(s&&s.t>=4&&s.c/s.t<0.6)w.push(TN[k])}
+  $('weak').innerHTML=w.length?w.map(function(x){return '<span class="bg bgW">'+x+'</span>'}).join(''):'<span class="sm mu">'+(P.ans.length<20?'Kommer når du har svart på noen flere oppgaver.':'Ingen temaer under 60 % akkurat nå.')+'</span>';
+  $('hist').innerHTML=P.hist.length?P.hist.slice(-5).reverse().map(function(x){return '<div class="row jb" style="padding:5px 0;border-bottom:1px solid var(--bd)"><span class="sm">'+esc(x.d)+' · '+esc(x.k)+'</span><span class="bg '+(x.p>=70?'bgO':x.p>=50?'bgW':'bgE')+' num">'+x.p+'%</span></div>'}).join(''):'<span class="sm mu">Ingen øvinger ennå.</span>';
+}
+
+/* ---------- lær ---------- */
+function rTopics(){$('lTop').innerHTML=T.map(function(t){return '<button class="ti" onclick="oT(\''+t.id+'\')"><span class="mono">'+t.mo+'</span><span class="tii"><span class="tn">'+TN[t.id]+'</span><br><span class="td">'+t.ds+'</span></span>'+(P.td.indexOf(t.id)>=0?'<span class="bg bgO">Lest</span>':'')+'</button>'}).join('')}
+function oT(id){var t=null;for(var i=0;i<T.length;i++)if(T[i].id===id)t=T[i];if(!t)return;$('lList').style.display='none';$('lDet').style.display='';
+  $('lCt').innerHTML='<div class="cd">'+t.ct+'</div><div class="row"><button class="btn bp" onclick="mTD(\''+id+'\')">'+(P.td.indexOf(id)>=0?'Lest':'Marker som lest')+'</button><button class="btn bo" onclick="quickQ(\''+id+'\')">Test meg i dette</button></div>';$('ms').scrollTop=0}
+function clT(){$('lList').style.display='';$('lDet').style.display='none';rTopics()}
+function mTD(id){if(P.td.indexOf(id)<0){P.td.push(id);save()}clT()}
+function quickQ(id){go('exam');$('eTyp').value='multi';$('eCnt').value='10';$('eTpc').value=id;$('eTim').value='0';startE()}
+
+/* ---------- eksamen ---------- */
+var eTmr=null;
+function resetE(){if(eTmr){clearInterval(eTmr);eTmr=null}$('eSet').style.display='';$('eAct').style.display='none';$('eRes').style.display='none';$('aiCaseMsg').textContent='';$('eMsg').textContent=pro()?'':'Gratis: bare flervalg, '+Math.max(0,10-dayN())+' spørsmål igjen i dag.'}
+function stedTxt(wp,sted){return sted?esc(sted):WP[wp][1]}
+function casePool(wp){return CS.filter(function(c){return c.w===wp||c.w==='alle'})}
+function mkMC(q){var o=shuffle([{t:q[2],ok:1},{t:q[3],ok:0},{t:q[4],ok:0},{t:q[5],ok:0}]);return{k:'mc',id:qid(q[1]),tp:q[0],q:q[1],o:o,e:q[6]}}
+function seenN(q){return (P.qs&&P.qs[qid(q[1])])||0}
+function mkCase(c,wp,sted){return{k:'case',t:c.t,s:c.s.replace('{sted}',stedTxt(wp,sted)),tk:c.tk,pts:c.pts,ai:!!c.ai}}
+function startE(){
+  var typ=$('eTyp').value,cnt=+$('eCnt').value,tpc=$('eTpc').value,tim=+$('eTim').value,wp=$('eW').value,sted=$('eS').value.trim();
+  if(!pro()){var left=10-dayN();if(left<=0){$('eMsg').textContent='Du har brukt dagens 10 gratisspørsmål. Kom tilbake i morgen, eller be om Pro-tilgang.';return}typ='multi';cnt=Math.min(cnt,left)}
+  var pool=shuffle(Q.filter(function(q){return tpc==='all'||q[0]===tpc})).sort(function(a,b){return seenN(a)-seenN(b)});
+  var cp=shuffle(casePool(wp));
+  var nC=typ==='multi'?0:typ==='case'?Math.min(cnt,cp.length,6):(cnt<=5?1:cnt<=10?2:cnt<=20?3:4);
+  nC=Math.min(nC,cp.length);
+  var nM=typ==='case'?0:Math.min(cnt-nC,pool.length);
+  var items=shuffle(pool.slice(0,nM)).map(mkMC).concat(cp.slice(0,nC).map(function(c){return mkCase(c,wp,sted)}));
+  beginE(items,tim,typ==='multi'?'Flervalg':typ==='case'?'Case':'Blandet');
+}
+function beginE(items,tim,kind){
+  E={items:items,i:0,mc:0,mcN:0,cs:[],kind:kind,left:tim*60,tp:{}};
+  $('eSet').style.display='none';$('eRes').style.display='none';$('eAct').style.display='';
+  $('eTmr').textContent='';if(eTmr)clearInterval(eTmr);eTmr=null;
+  if(tim>0){tick0();eTmr=setInterval(function(){E.left--;tick0();if(E.left<=0)showRes()},1000)}
+  showQ();
+}
+function tick0(){var m=Math.floor(E.left/60),s=E.left%60;var el=$('eTmr');el.textContent=m+':'+(s<10?'0':'')+s;el.className='timer'+(E.left<60?' c':E.left<300?' w':'')}
+function showQ(){
+  if(E.i>=E.items.length){showRes();return}
+  var q=E.items[E.i];$('ePrg').textContent=(E.i+1)+'/'+E.items.length;E.done=false;
+  if(q.k==='mc'){
+    $('eQ').innerHTML='<div class="cd"><span class="bg bgA">'+TN[q.tp]+'</span><h3 class="mt10 mb10">'+esc(q.q)+'</h3>'+q.o.map(function(o,i){return '<button class="ob" onclick="ansM('+i+')">'+esc(o.t)+'</button>'}).join('')+'<div id="eExp"></div></div>';
+  }else{
+    $('eQ').innerHTML='<div class="cd"><span class="bg bgW">Caseoppgave'+(q.ai?' · laget av AI':'')+'</span><h3 class="mt10">'+esc(q.t)+'</h3><div class="cb">'+q.s+'</div><ol>'+q.tk.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ol>'+
+    '<div class="fg mt10"><label for="cAns">Svaret ditt</label><textarea id="cAns" placeholder="Skriv som på eksamen: hva du gjør, i hvilken rekkefølge, og hvorfor. Bruk fagbegreper og vis til hjemler."></textarea></div>'+
+    '<div class="row"><button class="btn bp ai-only" id="cAiBtn" onclick="gradeAI()" style="display:'+(AI?'':'none')+'">Få AI-vurdering</button><button class="btn bo" onclick="gradeSelf()">Vis fasitpunkter og vurder selv</button></div><p class="sm mu mt6" id="cMsg"></p><div id="cOut"></div></div>';
+  }
+  $('ms').scrollTop=0;
+}
+function ansM(i){
+  if(E.done)return;E.done=true;var q=E.items[E.i];var ok=q.o[i].ok;
+  var bs=$('eQ').querySelectorAll('.ob');for(var j=0;j<bs.length;j++){bs[j].disabled=true;if(q.o[j].ok)bs[j].classList.add('ok');else if(j===i)bs[j].classList.add('no');else bs[j].classList.add('dim')}
+  E.mcN++;E.mc+=ok;dayN();P.day.n++;if(!E.tp[q.tp])E.tp[q.tp]={c:0,t:0};E.tp[q.tp].t++;E.tp[q.tp].c+=ok;
+  P.ans.push({tp:q.tp,ok:ok});if(P.ans.length>400)P.ans=P.ans.slice(-400);
+  if(!P.ts[q.tp])P.ts[q.tp]={c:0,t:0};P.ts[q.tp].t++;P.ts[q.tp].c+=ok;if(!P.qs)P.qs={};P.qs[q.id]=(P.qs[q.id]||0)+1;save();
+  $('eExp').innerHTML='<div class="exb '+(ok?'g':'r')+'"><strong>'+(ok?'Riktig.':'Feil.')+'</strong> '+esc(q.e)+'</div><button class="btn bp bw mt10" onclick="nextQ()">Neste</button>';
+}
+function nextQ(){E.i++;showQ()}
+function caseDone(frac,ai){E.cs.push(frac);P.cases.push({f:frac,ai:ai?1:0,d:today()});if(P.cases.length>60)P.cases=P.cases.slice(-60);save()}
+function gradeSelf(){
+  if(E.done)return;var q=E.items[E.i];
+  $('cOut').innerHTML='<div class="exb n"><strong>Dette bør en god besvarelse ha med</strong><p class="sm mu mb6">Huk av bare det du faktisk skrev. Vær streng.</p>'+q.pts.map(function(p,i){return '<label class="chk"><input type="checkbox" id="cp'+i+'"><span>'+esc(p)+'</span></label>'}).join('')+'</div><button class="btn bp bw mt10" onclick="saveSelf()">Lagre og gå videre</button>';
+}
+function saveSelf(){if(E.done)return;E.done=true;var q=E.items[E.i],n=0;for(var i=0;i<q.pts.length;i++)if($('cp'+i)&&$('cp'+i).checked)n++;caseDone(n/q.pts.length,false);nextQ()}
+function gradeAI(){
+  if(E.done||!AI)return;var q=E.items[E.i];var ans=$('cAns').value.trim();
+  if(ans.length<40){$('cMsg').textContent='Skriv et svar på minst et par setninger først.';return}
+  var ref=E,idx=E.i;$('cAiBtn').disabled=true;$('cMsg').textContent='AI leser svaret ditt …';
+  var prompt='Du er en streng, men rettferdig sensor i sikkerhetsfaget (norsk vekterutdanning). Vurder kandidatens svar på caseoppgaven.\n\nREGLER DU SKAL BRUKE SOM FASIT (ikke bruk andre lovtolkninger):\n'+FACTS+'\n\nCASE: '+q.t+'\n'+q.s.replace(/<[^>]+>/g,'')+'\n\nOPPGAVER:\n- '+q.tk.join('\n- ')+'\n\nMOMENTER EN GOD BESVARELSE BØR HA:\n- '+q.pts.join('\n- ')+'\n\nKANDIDATENS SVAR:\n"""'+ans.slice(0,6000)+'"""\n\nGi poeng 0-10. 5 betyr såvidt godkjent. Trekk for feil juss, manglende fagbegreper, manglende rekkefølge og manglende egensikkerhet. Ikke gi poeng for momenter som ikke står i svaret. Svar KUN med JSON på norsk bokmål, uten annen tekst:\n{"poeng":0,"dekket":["..."],"mangler":["..."],"feil":["..."],"kommentar":"2-4 setninger, direkte"}';
+  AI(prompt,{}).then(function(r){
+    if(E!==ref||E.i!==idx||E.done)return;
+    var j=parseJ(r&&r.text||'');
+    if(!j||typeof j.poeng!=='number'){$('cMsg').textContent='AI-svaret kunne ikke leses. Vurder selv med fasitpunktene.';$('cAiBtn').disabled=false;return}
+    E.done=true;var p=Math.max(0,Math.min(10,Math.round(j.poeng)));caseDone(p/10,true);
+    $('cMsg').textContent='';
+    var box=document.createElement('div');box.className='exb '+(p>=7?'g':p>=5?'n':'r');
+    function line(tt,arr){if(!arr||!arr.length)return;var h=document.createElement('p');h.style.marginTop='8px';var b=document.createElement('strong');b.textContent=tt;h.appendChild(b);box.appendChild(h);var ul=document.createElement('ul');arr.slice(0,8).forEach(function(x){var li=document.createElement('li');li.textContent=String(x);ul.appendChild(li)});box.appendChild(ul)}
+    var hd=document.createElement('strong');hd.textContent='AI-vurdering: '+p+' av 10';box.appendChild(hd);
+    var km=document.createElement('p');km.textContent=String(j.kommentar||'');box.appendChild(km);
+    line('Du fikk med',j.dekket);line('Dette mangler',j.mangler);line('Dette er feil',j.feil);
+    var nt=document.createElement('p');nt.className='note';nt.textContent='Vurderingen er laget av en AI og kan ta feil. Sammenlign med fasitpunktene under.';box.appendChild(nt);
+    var out=$('cOut');out.innerHTML='';out.appendChild(box);
+    var fp=document.createElement('div');fp.className='exb n';fp.innerHTML='<strong>Fasitpunkter</strong><ul>'+q.pts.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>';out.appendChild(fp);
+    var nb=document.createElement('button');nb.className='btn bp bw mt10';nb.textContent='Neste';nb.onclick=nextQ;out.appendChild(nb);
+  },function(e){aiOff(e);if(E!==ref||E.i!==idx)return;$('cMsg').textContent='AI er ikke tilgjengelig akkurat nå. Vurder selv med fasitpunktene.';var b=$('cAiBtn');if(b)b.disabled=false});
+}
+function aiCase(){
+  if(!AI)return;var w=$('aiW').value.trim();if(w.length<5){$('aiCaseMsg').textContent='Beskriv sted og situasjon først.';return}
+  $('aiCaseBtn').disabled=true;$('aiCaseMsg').textContent='AI lager en case …';
+  var prompt='Lag én realistisk caseoppgave for en norsk vekter som øver til eksamen i sikkerhetsfaget.\nSted og situasjon fra brukeren: """'+w.slice(0,300)+'"""\n\nBruk bare disse reglene som juridisk grunnlag:\n'+FACTS+'\n\nSvar KUN med JSON på norsk bokmål:\n{"tittel":"kort","situasjon":"3-5 setninger i du-form","oppgaver":["tre oppgaver"],"momenter":["6-7 korte momenter en god besvarelse bør ha med"]}';
+  AI(prompt,{cache:false}).then(function(r){
+    $('aiCaseBtn').disabled=false;var j=parseJ(r&&r.text||'');
+    if(!j||!j.situasjon||!Array.isArray(j.oppgaver)||!Array.isArray(j.momenter)||j.momenter.length<3){$('aiCaseMsg').textContent='Det gikk ikke denne gangen. Prøv igjen.';return}
+    $('aiCaseMsg').textContent='';
+    beginE([{k:'case',t:String(j.tittel||'AI-case'),s:esc(String(j.situasjon)),tk:j.oppgaver.slice(0,4).map(String),pts:j.momenter.slice(0,8).map(String),ai:true}],0,'AI-case');
+  },function(e){$('aiCaseBtn').disabled=false;aiOff(e);$('aiCaseMsg').textContent='AI er ikke tilgjengelig akkurat nå.'});
+}
+function showRes(){
+  if(eTmr){clearInterval(eTmr);eTmr=null}
+  var nM=0,nC=0;for(var i=0;i<E.items.length;i++){if(E.items[i].k==='mc')nM++;else nC++}
+  var cSum=0;for(var j=0;j<E.cs.length;j++)cSum+=E.cs[j];
+  var tot=nM+nC*3,got=E.mc+cSum*3,p=tot?Math.round(got/tot*100):0;
+  P.hist.push({d:new Date().toLocaleDateString('nb-NO'),k:E.kind,p:p});if(P.hist.length>40)P.hist=P.hist.slice(-40);save();
+  var h='<div class="cd"><div class="big" style="color:'+(p>=70?'var(--ok)':p>=50?'var(--wn)':'var(--err)')+'">'+p+'%</div><p class="mu mt6">';
+  if(nM)h+='Flervalg: '+E.mc+' av '+nM+' riktige. ';
+  if(nC)h+='Case: '+E.cs.length+' av '+nC+' besvart'+(E.cs.length?', snitt '+Math.round(cSum/E.cs.length*100)+' %':'')+'. ';
+  h+='</p><p class="note">Hver case teller som tre flervalg. Ubesvarte oppgaver gir null. Dette er øving: på ekte eksamen setter sensor karakter ut fra kompetansemålene.</p>';
+  var keys=Object.keys(E.tp);if(keys.length){h+='<h3>Per tema i denne runden</h3>';keys.forEach(function(k){var s=E.tp[k],pp=Math.round(s.c/s.t*100);h+=bar(TN[k],s.c+'/'+s.t,pp)})}
+  h+='<div class="row mt14"><button class="btn bp" onclick="go(\'exam\')">Ny runde</button><button class="btn bo" onclick="go(\'score\')">Er jeg klar?</button></div></div>';
+  $('eAct').style.display='none';$('eRes').style.display='';$('eRes').innerHTML=h;$('ms').scrollTop=0;
+}
+function endE(){if(E&&(E.mcN||E.cs.length))showRes();else resetE()}
+function bar(label,val,p){var col=p>=70?'var(--ok)':p>=50?'var(--wn)':'var(--err)';return '<div class="sbar"><div class="sbl"><span>'+label+'</span><span class="num">'+val+'</span></div><div class="pb"><div class="pf" style="width:'+p+'%;background:'+col+'"></div></div></div>'}
+
+/* ---------- flashcards med repetisjon ---------- */
+var IV=[1,2,3,5,8];
+var DECK=FC.map(function(f){return{id:f[1],c:f[0],q:f[1],a:f[2]}}).concat(GL.map(function(g){return{id:'gl:'+g[1],c:'Ordbok: '+g[0],q:'Hva betyr «'+g[1]+'»?',a:g[2]}}));
+var S={q:[],tot:0,done:0,flip:false};
+function inDeck(c,cat){return cat==='all'||c.c===cat||(cat==='ordbok'&&c.c.indexOf('Ordbok')===0)||(cat==='kjerne'&&c.c.indexOf('Ordbok')!==0)}
+function srCounts(cat){var t=today(),r={due:0,nw:0,kn:0,tot:0};DECK.forEach(function(c){if(!inDeck(c,cat))return;r.tot++;var s=P.sr[c.id];if(!s)r.nw++;else if(s.due<=t)r.due++;else r.kn++});return r}
+function srGot(){var n=0;DECK.forEach(function(c){var s=P.sr[c.id];if(s&&s.b>=1)n++});return n}
+function srKnown(){var n=0;DECK.forEach(function(c){var s=P.sr[c.id];if(s&&s.b>=2)n++});return n}
+function rDeckSel(){if(!pro()){$('fDeck').innerHTML='<option value="kjerne">Kjernestoff (gratis)</option>';return}var cats=[];FC.forEach(function(f){if(cats.indexOf(f[0])<0)cats.push(f[0])});
+  $('fDeck').innerHTML='<option value="all">Alle kort: forfalte + 20 nye</option><option value="kjerne">Kjernestoff</option><option value="ordbok">Fagordbok</option>'+cats.map(function(c){return '<option value="'+c+'">'+c+'</option>'}).join('')}
+function srStart(){
+  var cat=$('fDeck').value,t=today();var pool=DECK.filter(function(c){return inDeck(c,cat)});
+  var due=shuffle(pool.filter(function(c){return P.sr[c.id]&&P.sr[c.id].due<=t}));
+  var nw=shuffle(pool.filter(function(c){return !P.sr[c.id]})).slice(0,20);
+  S.q=due.concat(nw);S.tot=S.q.length;S.done=0;S.flip=false;srShow();
+}
+function srShow(){
+  var cat=$('fDeck').value,c=srCounts(cat);
+  $('fCnt').textContent=c.due+' til repetisjon · '+c.nw+' nye · '+c.kn+' kan du · '+c.tot+' totalt';
+  $('fPb').style.width=(S.tot?Math.round(S.done/S.tot*100):0)+'%';
+  if(!S.q.length){
+    $('fBox').innerHTML='<div class="cd"><h3>'+(S.tot?'Økten er ferdig':'Ingen kort å ta nå')+'</h3><p class="mu">'+(S.tot?'Du gikk gjennom '+S.tot+' kort. ':'')+(c.nw?'Det er '+c.nw+' nye kort igjen i denne stokken.':'Kom tilbake i morgen for repetisjon.')+'</p>'+(c.nw?'<button class="btn bp mt10" onclick="srStart()">Ta 20 nye</button>':'')+'</div>';return}
+  var k=S.q[0];
+  var h='<button class="fcard" onclick="srFlip()" aria-label="Snu kortet"><span class="sm mu">'+esc(k.c)+'</span><span class="q">'+esc(k.q)+'</span>'+(S.flip?'<span class="a">'+esc(k.a)+'</span>':'<span class="sm mu">Trykk for å se svaret</span>')+'</button>';
+  if(S.flip)h+='<div class="row mt10"><button class="btn berr" style="flex:1" onclick="srAns(0)">Bommet</button><button class="btn bok" style="flex:1" onclick="srAns(1)">Kunne det</button></div>';
+  h+='<p class="sm mu num mt10">'+S.q.length+' kort igjen i økten</p>';
+  $('fBox').innerHTML=h;
+}
+function srFlip(){S.flip=!S.flip;srShow()}
+function srAns(ok){
+  var k=S.q.shift(),s=P.sr[k.id]||{b:0,due:0},t=today();
+  if(ok){s.b=Math.min(5,s.b+1);s.due=t+IV[s.b-1];S.done++}else{s.b=0;s.due=t;S.q.push(k)}
+  P.sr[k.id]=s;save();S.flip=false;srShow();
+}
+
+/* ---------- er jeg klar? ---------- */
+function calcScore(){
+  var rec=recent(60),acc=pct(rec);var caps=[],todo=[];
+  var tSum=0,low=[],untested=[];
+  for(var k in TN){var s=P.ts[k];if(!s||s.t<4){untested.push(TN[k])}else{var r=s.c/s.t*100;tSum+=r;if(r<60)low.push(TN[k])}}
+  var tAvg=tSum/8;
+  var cards=Math.round(srKnown()/DECK.length*100);
+  var lc=P.cases.slice(-6),cAvg=0;if(lc.length){var cs=0;lc.forEach(function(x){cs+=x.f});cAvg=Math.round(cs/lc.length*100)}
+  var score=0.4*(acc||0)+0.2*tAvg+0.15*cards+0.25*cAvg;
+  if(P.ans.length<40){caps.push('Under 40 flervalgssvar: maks 55');score=Math.min(score,55);todo.push('Svar på minst 40 flervalgsoppgaver. Du har '+P.ans.length+'.')}
+  if(lc.length<3){caps.push('Færre enn 3 caseoppgaver: maks 60');score=Math.min(score,60);todo.push('Skriv minst 3 caseoppgaver. Du har '+P.cases.length+'.')}
+  if(untested.length){caps.push('Temaer du ikke er testet i: maks 65');score=Math.min(score,65);todo.push('Du er ikke testet nok i: '+untested.join(', ')+'.')}
+  if(low.length){caps.push('Tema under 60 %: maks 75');score=Math.min(score,75);todo.push('Under 60 % i: '+low.join(', ')+'. Les temaet og ta 10 spørsmål i det.')}
+  if(acc!==null&&acc<70)todo.push('Du treffer '+acc+' % på flervalg. Sikt mot 85.');
+  if(cards<50)todo.push('Bare '+cards+' % av kortene har du klart to ganger på rad. Ta flashcards hver dag.');
+  if(lc.length>=3&&cAvg<60)todo.push('Casesvarene dine dekker i snitt '+cAvg+' % av momentene. Skriv mer utfyllende og vis til hjemler.');
+  return{score:Math.round(Math.max(0,score)),acc:acc,tAvg:Math.round(tAvg),cards:cards,cAvg:cAvg,nCase:lc.length,caps:caps,todo:todo};
+}
+function verdict(s){return s>=85?'Du ligger godt an. Hold det ved like fram til eksamen.':s>=70?'Nesten. Tett hullene under, så er du der.':s>=50?'Ikke ennå. Du kan en del, men det er for mange hull til at dette er trygt.':s>=30?'Langt unna. Jobb deg gjennom temaene ett for ett.':'Du har så vidt begynt. Les temaene og ta flervalg hver dag.'}
+function rScore(){
+  if(!pro()){$('scC').innerHTML='<div class="cd"><h3>Krever Pro</h3><p class="mu">«Er jeg klar?» regner ut hvor du står på flervalg, caseoppgaver og flashcards. Det er en del av Pro.</p></div>';return}
+  var r=calcScore(),col=r.score>=70?'var(--ok)':r.score>=50?'var(--wn)':'var(--err)';
+  var h='<div class="cd"><div class="big" style="color:'+col+'">'+r.score+'<span style="font-size:20px;color:var(--tx2)"> / 100</span></div><p class="mt10" style="font-weight:700">'+verdict(r.score)+'</p>';
+  if(r.caps.length)h+='<p class="sm mu mt6">Tak som gjelder nå: '+r.caps.join(' · ')+'</p>';
+  h+='<p class="note">Tallet er regnet ut med en fast formel fra svarene dine i denne appen. Det sier hvor godt du kan stoffet her, ikke hvilken karakter du får.</p></div>';
+  h+='<div class="cd"><h3>Hva tallet bygger på</h3>'+bar('Flervalg, siste 60 (40 %)',r.acc===null?'ingen':r.acc+' %',r.acc||0)+bar('Snitt over alle åtte temaer (20 %)',r.tAvg+' %',r.tAvg)+bar('Flashcards klart to ganger på rad (15 %)',r.cards+' %',r.cards)+bar('Caseoppgaver, siste '+r.nCase+' (25 %)',r.nCase?r.cAvg+' %':'ingen',r.cAvg)+'</div>';
+  h+='<div class="cd"><h3>Per tema</h3>';for(var k in TN){var s=P.ts[k];h+=s&&s.t?bar(TN[k],s.c+'/'+s.t,Math.round(s.c/s.t*100)):bar(TN[k],'ikke testet',0)}h+='</div>';
+  h+='<div class="cd"><h3>Gjør dette</h3>'+(r.todo.length?'<ul>'+r.todo.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>':'<p class="mu">Ta en full runde på 40 oppgaver med tidsbegrensning som generalprøve.</p>')+'</div>';
+  h+='<div class="cd ai-only" style="display:'+(AI?'':'none')+'"><h3>Ærlig tilbakemelding fra AI</h3><p class="mu mb10">AI leser tallene dine og sier rett ut hvordan du ligger an.</p><button class="btn bo" id="aiVBtn" onclick="aiVerdict()">Be om tilbakemelding</button><p class="mt10" id="aiVOut"></p></div>';
+  $('scC').innerHTML=h;
+}
+function aiVerdict(){
+  if(!AI)return;var r=calcScore();$('aiVBtn').disabled=true;$('aiVOut').textContent='AI ser på tallene …';
+  var per=[];for(var k in TN){var s=P.ts[k];per.push(TN[k]+': '+(s&&s.t?s.c+'/'+s.t:'ikke testet'))}
+  var prompt='Du er en erfaren og direkte instruktør i sikkerhetsfaget. En kandidat øver til '+({eksamen:'skriftlig eksamen',fagprove:'fagprøven',begge:'eksamen og fagprøve',grunn:'vekterutdanningen'}[U.goal]||'eksamen')+'. Her er tallene fra øvingsappen:\nSamlet score: '+r.score+'/100\nFlervalg besvart totalt: '+P.ans.length+', riktig siste 60: '+(r.acc===null?'ingen':r.acc+'%')+'\nPer tema: '+per.join('; ')+'\nCaseoppgaver levert: '+P.cases.length+', snitt siste '+r.nCase+': '+r.cAvg+'%\nFlashcards som sitter: '+r.cards+'%\nDager på rad: '+P.str+'\n\nSkriv 4-6 setninger på norsk bokmål, i du-form. Vær ærlig og streng, ikke smigre. Si om kandidaten er klar eller ikke, hva som er svakest, og de to tingene som bør gjøres først. Ikke finn på tall som ikke står over. Ingen punktlister.';
+  AI(prompt,{cache:false}).then(function(x){$('aiVOut').textContent=(x&&x.text||'').trim()||'Fikk ikke noe svar.';$('aiVBtn').disabled=false},function(e){aiOff(e);$('aiVOut').textContent='AI er ikke tilgjengelig akkurat nå.';var b=$('aiVBtn');if(b)b.disabled=false});
+}
+
+/* ---------- ordbok, oppslag, kompetansemål, mer ---------- */
+var glCat='Alle';
+function rGLcats(){var cats=['Alle'];GL.forEach(function(g){if(cats.indexOf(g[0])<0)cats.push(g[0])});$('glCat').innerHTML=cats.map(function(c){return '<button class="pill'+(c===glCat?' on':'')+'" onclick="setGL(\''+c+'\')">'+c+'</button>'}).join('');$('glSub').textContent=GL.length+' fagord fra sikkerhetsbransjen'}
+function setGL(c){glCat=c;rGLcats();rGL()}
+function rGL(){var v=$('glS').value.trim().toLowerCase();var l=GL.filter(function(g){return(glCat==='Alle'||g[0]===glCat)&&(!v||g[1].toLowerCase().indexOf(v)>=0||g[2].toLowerCase().indexOf(v)>=0)}).sort(function(a,b){return a[1].localeCompare(b[1],'nb')});
+  $('glL').innerHTML=l.length?l.map(function(g){return '<div class="gl"><div class="glt">'+esc(g[1])+' <span class="sm mu" style="font-weight:500">· '+g[0]+'</span></div><div class="gld">'+esc(g[2])+'</div></div>'}).join(''):'<p class="mu">Ingen treff.</p>'}
+function rCS(){$('csC').innerHTML=CSH.map(function(s){return '<div class="ai"><button class="ab" onclick="this.parentElement.classList.toggle(\'op\')">'+s[0]+'</button><div class="acc">'+s[1]+'</div></div>'}).join('')}
+function rKM(){$('kmL').innerHTML=KM.map(function(k,i){var d=P.km.indexOf(i)>=0;return '<button class="km'+(d?' dn':'')+'" onclick="tKM('+i+')" aria-pressed="'+d+'"><span class="kb">'+(d?'✓':'')+'</span><span>'+(i+1)+'. '+esc(k)+'</span></button>'}).join('');$('kmCt').textContent=P.km.length+' av '+KM.length+' huket av';$('kmPb').style.width=Math.round(P.km.length/KM.length*100)+'%'}
+function tKM(i){var x=P.km.indexOf(i);if(x>=0)P.km.splice(x,1);else P.km.push(i);save();rKM()}
+function rMer(){$('pInfo').textContent=U.name+' · '+EMAIL+' · '+WP[U.wp][0]+(U.sted?' · '+U.sted:'')+' · Plan: '+(U.admin?'admin':U.plan);$('admBox').style.display=U.admin?'':'none';if(U.admin)rAdmin();$('upBox').style.display=pro()?'none':'';rstArmed=false;$('rstBtn').textContent='Nullstill';stInfo()}
+var rstArmed=false;
+function resetP(){if(!rstArmed){rstArmed=true;$('rstBtn').textContent='Trykk én gang til for å slette alt';return}P=freshP();P.str=1;P.ld=today();save();rstArmed=false;$('rstBtn').textContent='Nullstilt';rTopics();rKM()}
+
+/* ---------- start ---------- */
+var E=null;
+fillWP($('iW'),'kjopesenter');
+var AM='inn',RECOV=/type=recovery/.test(location.hash);
+function aMsg(t,err){var m=$('aMsg');m.textContent=t||'';m.style.color=err?'var(--err)':'var(--tx2)'}
+function authMode(m){
+  AM=m;aMsg('');
+  $('aTitle').textContent={inn:'Logg inn',ny:'Opprett konto',glemt:'Glemt passord',nytt:'Velg nytt passord'}[m];
+  $('aBtn').textContent={inn:'Logg inn',ny:'Opprett konto',glemt:'Send lenke',nytt:'Lagre passord'}[m];
+  $('aEw').style.display=m==='nytt'?'none':'';$('aPw').style.display=m==='glemt'?'none':'';
+  $('aPl').textContent=m==='inn'?'Passord':'Passord (minst 8 tegn)';
+  var l=$('aLinks');l.innerHTML='';
+  function lk(t,mm){var b=document.createElement('button');b.type='button';b.className='btn bo bs';b.textContent=t;b.onclick=function(){authMode(mm)};l.appendChild(b)}
+  if(m==='inn'){lk('Opprett konto','ny');lk('Glemt passord','glemt')}else if(m!=='nytt')lk('Tilbake til innlogging','inn');
+}
+function aErr(e){var t=(e&&e.message)||'';if(/Invalid login/i.test(t))return 'Feil e-post eller passord.';if(/not confirmed/i.test(t))return 'E-posten er ikke bekreftet. Trykk på lenken i e-posten du fikk.';if(/already registered/i.test(t))return 'Det finnes allerede en konto med denne e-posten.';if(/rate limit/i.test(t))return 'For mange forsøk. Vent litt og prøv igjen.';return t||'Noe gikk galt. Prøv igjen.'}
+function doAuth(){
+  var e=$('aE').value.trim(),p=$('aP').value,btn=$('aBtn');
+  if(AM!=='nytt'&&e.indexOf('@')<1){aMsg('Skriv inn e-postadressen din.',1);return}
+  if((AM==='ny'||AM==='nytt')&&p.length<8){aMsg('Passordet må ha minst 8 tegn.',1);return}
+  if(AM==='inn'&&!p){aMsg('Skriv inn passordet.',1);return}
+  btn.disabled=true;aMsg('Vent …');
+  var done=function(){btn.disabled=false},fail=function(){done();aMsg('Ingen kontakt med serveren. Prøv igjen.',1)};
+  if(AM==='inn')SB.auth.signInWithPassword({email:e,password:p}).then(function(r){done();if(r.error){aMsg(aErr(r.error),1);return}enter(r.data.user)},fail);
+  else if(AM==='ny')SB.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin}}).then(function(r){done();if(r.error){aMsg(aErr(r.error),1);return}if(r.data.session)enter(r.data.user);else{authMode('inn');aMsg('Vi har sendt deg en e-post. Trykk på lenken i den for å bekrefte kontoen, og logg inn etterpå.')}},fail);
+  else if(AM==='glemt')SB.auth.resetPasswordForEmail(e,{redirectTo:location.origin}).then(function(r){done();if(r.error){aMsg(aErr(r.error),1);return}aMsg('Finnes det en konto med denne adressen, har vi sendt en lenke for å velge nytt passord.')},fail);
+  else SB.auth.updateUser({password:p}).then(function(r){done();if(r.error){aMsg(aErr(r.error),1);return}RECOV=false;enter(r.data.user)},fail);
+}
+function logout(){if(svTimer){clearTimeout(svTimer);svTimer=null}var go0=function(){SB.auth.signOut().then(function(){location.reload()},function(){location.reload()})};
+  if(svDirty&&UID)SB.from('progress').upsert({user_id:UID,data:P,upd:P.upd}).then(go0,go0);else go0()}
+function enter(user){
+  UID=user.id;EMAIL=user.email||'';
+  Promise.all([SB.from('profiles').select('*').eq('id',UID).maybeSingle(),SB.from('progress').select('data,upd').eq('user_id',UID).maybeSingle()]).then(function(r){
+    if(r[0].error||!r[0].data){authMode('inn');show('auth');aMsg('Kunne ikke hente profilen din. Er databasen satt opp? Prøv igjen om litt.',1);return}
+    var pr=r[0].data;U={name:pr.name||'',wp:WP[pr.wp]?pr.wp:'kjopesenter',sted:pr.sted||'',goal:pr.goal||'eksamen',plan:pr.plan||'gratis',admin:!!pr.is_admin};
+    var loc=lsGet('p_'+UID,null),rem=r[1].data;P=freshP();
+    if(rem&&rem.data&&typeof rem.data==='object')P=Object.assign(freshP(),rem.data);
+    if(loc&&(loc.upd||0)>(P.upd||0)){P=Object.assign(freshP(),loc);save()}
+    if(U.name)run();else show('onb');
+  },function(){authMode('inn');show('auth');aMsg('Ingen kontakt med serveren. Prøv igjen.',1)});
+}
+SB.auth.onAuthStateChange(function(ev){if(ev==='PASSWORD_RECOVERY'){RECOV=true;authMode('nytt');show('auth')}});
+SB.auth.getSession().then(function(r){var ss=r.data&&r.data.session;if(RECOV){authMode('nytt');show('auth')}else if(ss)enter(ss.user);else{authMode('inn');show('auth')}},function(){authMode('inn');show('auth');aMsg('Ingen kontakt med serveren.',1)});
+
+/* ---------- admin ---------- */
+function mkRow(txt,ctrl){var row=document.createElement('div');row.className='row jb';row.style.cssText='padding:7px 0;border-bottom:1px solid var(--bd)';var sp=document.createElement('span');sp.className='sm';sp.style.cssText='flex:1;min-width:0;overflow-wrap:anywhere';sp.textContent=txt;row.appendChild(sp);row.appendChild(ctrl);return row}
+function rAdmin(){
+  SB.from('profiles').select('id,email,name,plan,is_admin').order('created_at',{ascending:false}).limit(500).then(function(r){var box=$('adU');box.innerHTML='';
+    if(r.error){box.textContent='Kunne ikke hente brukere.';return}
+    (r.data||[]).forEach(function(u){var sel=document.createElement('select');sel.style.cssText='padding:5px 8px;border:1.5px solid var(--bd);border-radius:8px;background:var(--bg2)';sel.setAttribute('aria-label','Plan for '+(u.email||''));
+      ['gratis','pro','livstid'].forEach(function(pl){var o=document.createElement('option');o.value=pl;o.textContent=pl;if(u.plan===pl)o.selected=true;sel.appendChild(o)});
+      sel.onchange=function(){admSet(u.id,sel.value)};box.appendChild(mkRow((u.name||'(uten navn)')+' · '+(u.email||'')+(u.is_admin?' · admin':''),sel))});
+    if(!(r.data||[]).length)box.textContent='Ingen brukere ennå.'});
+  SB.from('invites').select('email,plan').order('created_at',{ascending:false}).then(function(r){var box=$('adI');box.innerHTML='';
+    if(r.error){box.textContent='Kunne ikke hente invitasjoner.';return}
+    (r.data||[]).forEach(function(i){var b=document.createElement('button');b.className='btn bo bs';b.textContent='Fjern';b.onclick=function(){SB.from('invites').delete().eq('email',i.email).then(rAdmin)};box.appendChild(mkRow(i.email+' · '+i.plan,b))});
+    if(!(r.data||[]).length)box.textContent='Ingen ventende.'});
+}
+function admSet(id,plan){SB.rpc('admin_set_plan',{target:id,new_plan:plan}).then(function(r){$('adMsg').textContent=r.error?'Kunne ikke endre plan.':'Plan endret.'})}
+function admAdd(){
+  var e=$('adE').value.trim().toLowerCase(),pl=$('adP').value;if(e.indexOf('@')<1){$('adMsg').textContent='Skriv inn en e-postadresse.';return}
+  SB.from('profiles').select('id').eq('email',e).maybeSingle().then(function(r){
+    if(r.data&&r.data.id)SB.rpc('admin_set_plan',{target:r.data.id,new_plan:pl}).then(function(x){$('adMsg').textContent=x.error?'Kunne ikke endre plan.':'Brukeren finnes og har nå planen '+pl+'.';rAdmin()});
+    else SB.from('invites').upsert({email:e,plan:pl}).then(function(x){$('adMsg').textContent=x.error?'Kunne ikke lagre invitasjonen.':'Lagret. Personen får planen '+pl+' når hun registrerer seg med denne adressen.';$('adE').value='';rAdmin()});
+  });
+}
+</script>
+</body>
+</html>

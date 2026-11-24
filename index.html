@@ -256,6 +256,7 @@ function save(){P.upd=Date.now();if(UID)lsSet('p_'+UID,P);svDirty=true;if(!svTim
 function flush(){svTimer=null;if(!UID||!svDirty||svBusy)return;svDirty=false;svBusy=true;
   SB.from('progress').upsert({user_id:UID,data:P,upd:P.upd}).then(function(r){svBusy=false;STORE=r.error?'feil':'konto';stInfo();
     if(r.error){svDirty=true;svTimer=setTimeout(flush,10000)}else if(svDirty)svTimer=setTimeout(flush,1500)},function(){svBusy=false;svDirty=true;STORE='feil';stInfo();svTimer=setTimeout(flush,10000)})}
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'&&svDirty&&UID){if(svTimer){clearTimeout(svTimer);svTimer=null}flush()}});
 function stInfo(){var el=document.getElementById('stInfo');if(el)el.textContent=STORE==='konto'?'Framgangen lagres på kontoen din og følger deg mellom enheter.':'Får ikke kontakt med serveren akkurat nå. Framgangen ligger i denne nettleseren og lastes opp når forbindelsen er tilbake.'}
 function pro(){return !!U&&(U.admin||U.plan==='pro'||U.plan==='livstid')}
 function dayN(){var t=today();if(!P.day||P.day.d!==t)P.day={d:t,n:0};return P.day.n}

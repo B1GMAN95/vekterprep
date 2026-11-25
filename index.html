@@ -170,7 +170,7 @@ textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
       <div class="fg"><label for="eW">Arbeidssted i caseoppgavene</label><select id="eW"></select></div>
       <div class="fg"><label for="eS">Navn på stedet (valgfritt)</label><input id="eS" placeholder="F.eks. Ski Storsenter"></div>
       <div class="fg"><label for="eTim">Tidsbegrensning</label><select id="eTim"><option value="0">Ingen</option><option value="30">30 minutter</option><option value="60">60 minutter</option><option value="120">120 minutter</option><option value="300">5 timer</option></select></div>
-      <label class="chk ai-only" style="display:none"><input type="checkbox" id="eAiSet"><span>La AI lage nye oppgaver til eksamenssettet</span></label>
+      <label class="chk ai-only" style="display:none"><input type="checkbox" id="eAiSet"><span>La AI lage nye oppgaver ut fra tidligere eksamener</span></label>
       <button class="btn bp bw" onclick="startE()">Start</button><p class="sm mu mt6" id="eMsg"></p>
     </div>
     <div class="cd"><div class="ai"><button class="ab" onclick="this.parentElement.classList.toggle('op')">Slik er den skriftlige eksamenen (SIK3103)</button><div class="acc">
@@ -939,8 +939,9 @@ function startSet(){
   save();
   if(!(AI&&$('eAiSet')&&$('eAiSet').checked)){beginE(items,tim,'Eksamenssett');return}
   $('eMsg').textContent='AI lager fire nye oppgaver. Det kan ta et halvt minutt …';
-  Promise.all(l.map(function(c){return aiCall('examtask',{tema:c.tm}).then(function(r){return parseJ(r.text||'')},function(){return null})})).then(function(js){
-    js.forEach(function(j,i){if(j&&typeof j.situasjon==='string'&&Array.isArray(j.deloppgaver)&&j.deloppgaver.length>=2&&Array.isArray(j.momenter)&&j.momenter.length>=4){items[i].s=esc(j.situasjon);items[i].tk=j.deloppgaver.slice(0,3).map(String);items[i].pts=j.momenter.slice(0,8).map(String);items[i].ai=true}});
+  var pk=shuffle([0,1,2,3,4,5,6,7,8,9,10]),st=Math.random()<0.5&&WP[U.wp]?WP[U.wp][0]:'';
+  Promise.all(l.map(function(c,i){return aiCall('examtask',{pick:pk[i],mix:pk[i+4],sted:st}).then(function(r){var j=parseJ(r.text||'');if(j)j.tema=r.tema;return j},function(){return null})})).then(function(js){
+    js.forEach(function(j,i){if(j&&typeof j.situasjon==='string'&&Array.isArray(j.deloppgaver)&&j.deloppgaver.length>=2&&Array.isArray(j.momenter)&&j.momenter.length>=4){items[i].s=esc(j.situasjon);if(j.tema)items[i].t=String(j.tema);items[i].tk=j.deloppgaver.slice(0,3).map(String);items[i].pts=j.momenter.slice(0,8).map(String);items[i].ai=true}});
     $('eMsg').textContent='';beginE(items,tim,'Eksamenssett');
   });
 }

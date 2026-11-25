@@ -170,6 +170,7 @@ textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
       <div class="fg"><label for="eW">Arbeidssted i caseoppgavene</label><select id="eW"></select></div>
       <div class="fg"><label for="eS">Navn på stedet (valgfritt)</label><input id="eS" placeholder="F.eks. Ski Storsenter"></div>
       <div class="fg"><label for="eTim">Tidsbegrensning</label><select id="eTim"><option value="0">Ingen</option><option value="30">30 minutter</option><option value="60">60 minutter</option><option value="120">120 minutter</option><option value="300">5 timer</option></select></div>
+      <label class="chk ai-only" style="display:none"><input type="checkbox" id="eAiSet"><span>La AI lage nye oppgaver til eksamenssettet</span></label>
       <button class="btn bp bw" onclick="startE()">Start</button><p class="sm mu mt6" id="eMsg"></p>
     </div>
     <div class="cd"><div class="ai"><button class="ab" onclick="this.parentElement.classList.toggle('op')">Slik er den skriftlige eksamenen (SIK3103)</button><div class="acc">
@@ -229,10 +230,11 @@ textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
 <h3>Hvem står bak</h3><p>VekterPrep er et privat prosjekt i testfase, drevet av Hossen Hansen, som er ansvarlig for opplysningene.</p>
 <h3>Hva som lagres</h3><ul><li>E-postadressen du registrerer deg med, og passordet ditt i kryptert form</li><li>Fornavn, type arbeidssted, navn på arbeidsstedet hvis du oppgir det, og hva du øver til</li><li>Framgangen din: svar på flervalg, resultater på caseoppgaver, flashcards, leste temaer og avhukede kompetansemål</li><li>Hvilken plan du har</li></ul><p>Tekstene du skriver i caseoppgaver blir ikke lagret.</p>
 <h3>Hvor det lagres</h3><p>Hos databaseleverandøren Supabase, på servere i Europa, og en kopi av framgangen i nettleseren din. Nettsiden leveres av Vercel, som ser tekniske opplysninger som IP-adresse når siden lastes.</p>
+<h3>AI-funksjonene</h3><p>Når du trykker på en AI-knapp, sendes oppgaven og svaret ditt, eller tallene dine fra «Er jeg klar?», til en AI-leverandør for å lage en vurdering. Navn og e-post sendes ikke. Ikke skriv navn på ekte personer, helseopplysninger eller annet følsomt i svarene dine.</p>
 <h3>Hvem som ser det</h3><p>Du ser dine egne opplysninger. Administrator ser navn, e-post og plan for å kunne gi tilgang, men åpner ikke framgangen din uten grunn. Opplysningene selges ikke, brukes ikke til reklame og deles ikke med arbeidsgiveren din.</p>
 <h3>Sletting og rettighetene dine</h3><p>«Nullstill framgang» sletter framgangen. Vil du slette hele kontoen, ta kontakt med administrator. Etter personvernreglene har du rett til innsyn, retting og sletting, og du kan klage til Datatilsynet.</p></div>
 <div class="cd"><h2>Vilkår for bruk</h2>
-<ul><li>VekterPrep er et øvingsverktøy. Det erstatter ikke godkjent vekterutdanning, læreplanen eller kursmateriellet ditt.</li><li>Fagstoffet er skrevet av en AI og kontrollert mot offentlige kilder, men er ikke godkjent av en faglærer. Det kan inneholde feil, og lover endres. Er det forskjell mellom appen og kursmateriellet eller Lovdata, er det appen som tar feil.</li><li>Innholdet er ikke juridisk rådgivning. I en virkelig situasjon gjelder loven, tjenesteinstruksen og beskjed fra politiet.</li><li>«Er jeg klar?»-tallet er veiledende. Ingen kan love deg at du består.</li><li>Tjenesten er i testfase, er gratis, og kan endres eller tas ned uten varsel. Framgang kan gå tapt.</li><li>Ikke kopier eller selg innholdet videre uten avtale.</li></ul>
+<ul><li>VekterPrep er et øvingsverktøy. Det erstatter ikke godkjent vekterutdanning, læreplanen eller kursmateriellet ditt.</li><li>Fagstoffet er skrevet av en AI og kontrollert mot offentlige kilder, men er ikke godkjent av en faglærer. Det kan inneholde feil, og lover endres. Er det forskjell mellom appen og kursmateriellet eller Lovdata, er det appen som tar feil.</li><li>Innholdet er ikke juridisk rådgivning. I en virkelig situasjon gjelder loven, tjenesteinstruksen og beskjed fra politiet.</li><li>AI-vurderingene og «Er jeg klar?»-tallet er veiledende, og AI kan ta feil. Ingen kan love deg at du består.</li><li>Tjenesten er i testfase, er gratis, og kan endres eller tas ned uten varsel. Framgang kan gå tapt.</li><li>Ikke kopier eller selg innholdet videre uten avtale.</li></ul>
 <p class="note">Teksten er et utkast laget for testversjonen. Før tjenesten selges, må den gjennomgås av en jurist og utvides med firmaopplysninger, betalingsvilkår, angrerett og avtaler med underleverandører.</p></div></section>
 
 <section class="sec" id="s-opps"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Oppslagsverk</h1><p class="sub mb10">Kortversjonen</p><div class="cd" id="csC"></div></section>
@@ -734,8 +736,15 @@ var FPC='<div class="cd"><p>Offisiell informasjon om den skriftlige eksamenen fi
 
 /* ---------- AI (valgfritt, virker bare der siden får lov) ---------- */
 var AI=null;
+function aiCall(task,data){
+  return SB.auth.getSession().then(function(r){var t=r.data&&r.data.session&&r.data.session.access_token;if(!t)throw{code:'no_auth'};
+    return fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+t},body:JSON.stringify({task:task,data:data})})})
+  .then(function(r){return r.json().then(function(j){if(!r.ok)throw{code:(j&&j.code)||'error'};return j})});
+}
+function aiProbe(){try{fetch('/api/ai').then(function(r){return r.json()}).then(function(j){AI=!!(j&&j.ok)&&pro();aiUI()},function(){})}catch(e){}}
+function aiErr(e){return e&&e.code==='rate_limited'?'Du har brukt opp dagens AI-kvote. Prøv igjen i morgen.':'AI er ikke tilgjengelig akkurat nå.'}
 function aiUI(){var b=$('aiCaseBox');if(b)b.style.display=AI?'':'none';var els=document.querySelectorAll('.ai-only');for(var i=0;i<els.length;i++)els[i].style.display=AI?'':'none'}
-function aiOff(e){if(e&&e.code==='not_granted'){AI=null;aiUI()}}
+function aiOff(e){if(e&&(e.code==='not_configured'||e.code==='not_pro')){AI=null;aiUI()}}
 function parseJ(t){try{var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<0)return null;return JSON.parse(t.slice(a,b+1))}catch(e){return null}}
 
 /* ---------- oppstart ---------- */
@@ -858,7 +867,7 @@ function gradeAI(){
   if(ans.length<40){$('cMsg').textContent='Skriv et svar på minst et par setninger først.';return}
   var ref=E,idx=E.i;$('cAiBtn').disabled=true;$('cMsg').textContent='AI leser svaret ditt …';
   var prompt='Du er en streng, men rettferdig sensor i sikkerhetsfaget (norsk vekterutdanning). Vurder kandidatens svar på caseoppgaven.\n\nREGLER DU SKAL BRUKE SOM FASIT (ikke bruk andre lovtolkninger):\n'+FACTS+'\n\nCASE: '+q.t+'\n'+q.s.replace(/<[^>]+>/g,'')+'\n\nOPPGAVER:\n- '+q.tk.join('\n- ')+'\n\nMOMENTER EN GOD BESVARELSE BØR HA:\n- '+q.pts.join('\n- ')+'\n\nKANDIDATENS SVAR:\n"""'+ans.slice(0,6000)+'"""\n\nGi poeng 0-10. 5 betyr såvidt godkjent. Trekk for feil juss, manglende fagbegreper, manglende rekkefølge og manglende egensikkerhet. Ikke gi poeng for momenter som ikke står i svaret. Svar KUN med JSON på norsk bokmål, uten annen tekst:\n{"poeng":0,"dekket":["..."],"mangler":["..."],"feil":["..."],"kommentar":"2-4 setninger, direkte"}';
-  AI(prompt,{}).then(function(r){
+  aiCall('grade',{title:q.t,situation:q.s.replace(/<[^>]+>/g,''),tasks:q.tk,points:q.pts,answer:ans}).then(function(r){
     if(E!==ref||E.i!==idx||E.done)return;
     var j=parseJ(r&&r.text||'');
     if(!j||typeof j.poeng!=='number'){$('cMsg').textContent='AI-svaret kunne ikke leses. Vurder selv med fasitpunktene.';$('cAiBtn').disabled=false;return}
@@ -873,18 +882,18 @@ function gradeAI(){
     var out=$('cOut');out.innerHTML='';out.appendChild(box);
     var fp=document.createElement('div');fp.className='exb n';fp.innerHTML='<strong>Fasitpunkter</strong><ul>'+q.pts.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul>';out.appendChild(fp);
     var nb=document.createElement('button');nb.className='btn bp bw mt10';nb.textContent='Neste';nb.onclick=nextQ;out.appendChild(nb);
-  },function(e){aiOff(e);if(E!==ref||E.i!==idx)return;$('cMsg').textContent='AI er ikke tilgjengelig akkurat nå. Vurder selv med fasitpunktene.';var b=$('cAiBtn');if(b)b.disabled=false});
+  },function(e){aiOff(e);if(E!==ref||E.i!==idx)return;$('cMsg').textContent=aiErr(e)+' Vurder selv med fasitpunktene.';var b=$('cAiBtn');if(b)b.disabled=false});
 }
 function aiCase(){
   if(!AI)return;var w=$('aiW').value.trim();if(w.length<5){$('aiCaseMsg').textContent='Beskriv sted og situasjon først.';return}
   $('aiCaseBtn').disabled=true;$('aiCaseMsg').textContent='AI lager en case …';
   var prompt='Lag én realistisk caseoppgave for en norsk vekter som øver til eksamen i sikkerhetsfaget.\nSted og situasjon fra brukeren: """'+w.slice(0,300)+'"""\n\nBruk bare disse reglene som juridisk grunnlag:\n'+FACTS+'\n\nSvar KUN med JSON på norsk bokmål:\n{"tittel":"kort","situasjon":"3-5 setninger i du-form","oppgaver":["tre oppgaver"],"momenter":["6-7 korte momenter en god besvarelse bør ha med"]}';
-  AI(prompt,{cache:false}).then(function(r){
+  aiCall('case',{where:w}).then(function(r){
     $('aiCaseBtn').disabled=false;var j=parseJ(r&&r.text||'');
     if(!j||!j.situasjon||!Array.isArray(j.oppgaver)||!Array.isArray(j.momenter)||j.momenter.length<3){$('aiCaseMsg').textContent='Det gikk ikke denne gangen. Prøv igjen.';return}
     $('aiCaseMsg').textContent='';
     beginE([{k:'case',t:String(j.tittel||'AI-case'),s:esc(String(j.situasjon)),tk:j.oppgaver.slice(0,4).map(String),pts:j.momenter.slice(0,8).map(String),ai:true}],0,'AI-case');
-  },function(e){$('aiCaseBtn').disabled=false;aiOff(e);$('aiCaseMsg').textContent='AI er ikke tilgjengelig akkurat nå.'});
+  },function(e){$('aiCaseBtn').disabled=false;aiOff(e);$('aiCaseMsg').textContent=aiErr(e)});
 }
 function showRes(){
   if(eTmr){clearInterval(eTmr);eTmr=null}
@@ -927,7 +936,13 @@ function startSet(){
   if(!P.exs)P.exs={};var tim=+$('eTim').value,wp=$('eW').value,sted=$('eS').value.trim(),W=[30,30,20,20];
   var l=shuffle(EX).sort(function(a,b){return (P.exs[a.tm]||0)-(P.exs[b.tm]||0)}).slice(0,4);
   var items=l.map(function(c,i){P.exs[c.tm]=(P.exs[c.tm]||0)+1;return{k:'case',abc:true,w:W[i],lab:'Oppgave '+(i+1)+' · teller '+W[i]+' %',t:c.tm,s:c.s.replace('{sted}',stedTxt(wp,sted)),tk:c.d,pts:c.pts}});
-  save();beginE(items,tim,'Eksamenssett');
+  save();
+  if(!(AI&&$('eAiSet')&&$('eAiSet').checked)){beginE(items,tim,'Eksamenssett');return}
+  $('eMsg').textContent='AI lager fire nye oppgaver. Det kan ta et halvt minutt …';
+  Promise.all(l.map(function(c){return aiCall('examtask',{tema:c.tm}).then(function(r){return parseJ(r.text||'')},function(){return null})})).then(function(js){
+    js.forEach(function(j,i){if(j&&typeof j.situasjon==='string'&&Array.isArray(j.deloppgaver)&&j.deloppgaver.length>=2&&Array.isArray(j.momenter)&&j.momenter.length>=4){items[i].s=esc(j.situasjon);items[i].tk=j.deloppgaver.slice(0,3).map(String);items[i].pts=j.momenter.slice(0,8).map(String);items[i].ai=true}});
+    $('eMsg').textContent='';beginE(items,tim,'Eksamenssett');
+  });
 }
 
 /* ---------- fagsamtale og egne spørsmål ---------- */
@@ -1032,7 +1047,7 @@ function aiVerdict(){
   if(!AI)return;var r=calcScore();$('aiVBtn').disabled=true;$('aiVOut').textContent='AI ser på tallene …';
   var per=[];for(var k in TN){var s=P.ts[k];per.push(TN[k]+': '+(s&&s.t?s.c+'/'+s.t:'ikke testet'))}
   var prompt='Du er en erfaren og direkte instruktør i sikkerhetsfaget. En kandidat øver til '+({eksamen:'skriftlig eksamen',fagprove:'fagprøven',begge:'eksamen og fagprøve',grunn:'vekterutdanningen'}[U.goal]||'eksamen')+'. Her er tallene fra øvingsappen:\nSamlet score: '+r.score+'/100\nFlervalg besvart totalt: '+P.ans.length+', riktig siste 60: '+(r.acc===null?'ingen':r.acc+'%')+'\nPer tema: '+per.join('; ')+'\nCaseoppgaver levert: '+P.cases.length+', snitt siste '+r.nCase+': '+r.cAvg+'%\nFlashcards som sitter: '+r.cards+'%\nDager på rad: '+P.str+'\n\nSkriv 4-6 setninger på norsk bokmål, i du-form. Vær ærlig og streng, ikke smigre. Si om kandidaten er klar eller ikke, hva som er svakest, og de to tingene som bør gjøres først. Ikke finn på tall som ikke står over. Ingen punktlister.';
-  AI(prompt,{cache:false}).then(function(x){$('aiVOut').textContent=(x&&x.text||'').trim()||'Fikk ikke noe svar.';$('aiVBtn').disabled=false},function(e){aiOff(e);$('aiVOut').textContent='AI er ikke tilgjengelig akkurat nå.';var b=$('aiVBtn');if(b)b.disabled=false});
+  aiCall('verdict',{stats:'Øver til: '+U.goal+'. Samlet score: '+r.score+'/100. Flervalg besvart totalt: '+P.ans.length+', riktig siste 60: '+(r.acc===null?'ingen':r.acc+'%')+'. Per tema: '+per.join('; ')+'. Caseoppgaver levert: '+P.cases.length+', snitt siste '+r.nCase+': '+r.cAvg+'%. Flashcards klart to ganger: '+r.cards+'%. Dager på rad: '+P.str+'.'}).then(function(x){$('aiVOut').textContent=(x&&x.text||'').trim()||'Fikk ikke noe svar.';$('aiVBtn').disabled=false},function(e){aiOff(e);$('aiVOut').textContent=aiErr(e);var b=$('aiVBtn');if(b)b.disabled=false});
 }
 
 /* ---------- ordbok, oppslag, kompetansemål, mer ---------- */
@@ -1086,7 +1101,7 @@ function enter(user){
     var loc=lsGet('p_'+UID,null),rem=r[1].data;P=freshP();
     if(rem&&rem.data&&typeof rem.data==='object')P=Object.assign(freshP(),rem.data);
     if(loc&&(loc.upd||0)>(P.upd||0)){P=Object.assign(freshP(),loc);save()}
-    if(U.name)run();else show('onb');
+    aiProbe();if(U.name)run();else show('onb');
   },function(){authMode('inn');show('auth');aMsg('Ingen kontakt med serveren. Prøv igjen.',1)});
 }
 SB.auth.onAuthStateChange(function(ev){if(ev==='PASSWORD_RECOVERY'){RECOV=true;authMode('nytt');show('auth')}});

@@ -163,8 +163,9 @@ textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
   <div id="eSet">
     <h1>Eksamenssimulator</h1><p class="sub mb14">Flervalg rettes automatisk. Caseoppgaver skriver du selv og får vurdert.</p>
     <div class="cd">
+      <div class="fg"><label for="eMode">Hva øver du til?</label><select id="eMode" onchange="preset()"><option value="fri">Fri øving</option><option value="kurs">Vekterkurset: 80 flervalg med fire svaralternativer</option><option value="eks">Eksamen i sikkerhetsfaget: caseoppgaver fra arbeidsstedet</option></select></div>
       <div class="fg"><label for="eTyp">Type</label><select id="eTyp"><option value="mixed">Blandet: flervalg + case</option><option value="multi">Bare flervalg</option><option value="case">Bare caseoppgaver</option></select></div>
-      <div class="fg"><label for="eCnt">Antall oppgaver</label><select id="eCnt"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="40">40</option></select></div>
+      <div class="fg"><label for="eCnt">Antall oppgaver</label><select id="eCnt"><option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="40">40</option><option value="80">80</option></select></div>
       <div class="fg"><label for="eTpc">Tema for flervalg</label><select id="eTpc"></select></div>
       <div class="fg"><label for="eW">Arbeidssted i caseoppgavene</label><select id="eW"></select></div>
       <div class="fg"><label for="eS">Navn på stedet (valgfritt)</label><input id="eS" placeholder="F.eks. Ski Storsenter"></div>
@@ -231,7 +232,12 @@ textarea{min-height:150px;resize:vertical;line-height:1.5;background:var(--bg)}
 <p class="note">Teksten er et utkast laget for testversjonen. Før tjenesten selges, må den gjennomgås av en jurist og utvides med firmaopplysninger, betalingsvilkår, angrerett og avtaler med underleverandører.</p></div></section>
 
 <section class="sec" id="s-opps"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Oppslagsverk</h1><p class="sub mb10">Kortversjonen</p><div class="cd" id="csC"></div></section>
-<section class="sec" id="s-fagp"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Fagprøveguide</h1><p class="sub mb10">Den praktiske prøven</p><div id="fpC"></div></section>
+<section class="sec" id="s-fagp"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Fagprøveguide</h1><p class="sub mb10">Den praktiske prøven</p><div class="cd"><h3>Fagsamtale: forklar hvorfor</h3><p class="mu mb10">Fagprøven handler om å forstå hvorfor du gjør jobben slik du gjør den. Her får du fem spørsmål av typen prøvenemnda stiller, knyttet til arbeidsstedet ditt. Du skriver svaret og vurderer deg selv mot momentene.</p><button class="btn bp" onclick="startWhy()">Start fem spørsmål</button><p class="sm mu mt6" id="whyMsg"></p></div>
+<div class="cd"><h3>Egne spørsmål</h3><p class="mu mb10">Lag spørsmål om din egen jobb og skriv svaret. De blir til flashcards du kan øve på.</p>
+<div class="fg"><label for="ownQ">Spørsmål</label><input id="ownQ" placeholder="F.eks. Hvorfor går vi stengerunde i den rekkefølgen?"></div>
+<div class="fg"><label for="ownA">Svaret ditt</label><textarea id="ownA" style="min-height:90px"></textarea></div>
+<div class="row"><button class="btn bp bs" onclick="ownAdd()">Lagre</button><button class="btn bo bs" onclick="ownPractice()">Øv på egne</button></div><p class="sm mu mt6" id="ownMsg"></p><div id="ownL" class="mt10"></div></div>
+<div id="fpC"></div></section>
 <section class="sec" id="s-komp"><button class="btn bo bs mb10" onclick="go('mer')">Tilbake</button><h1>Kompetansemål</h1><p class="sub mb10">Forkortet gjengivelse av målene i SIK03-02. Ordlyden står på <a href="https://www.udir.no/lk20/sik03-02">udir.no</a>.</p><div class="pb mb6"><div class="pf" id="kmPb" style="width:0%"></div></div><p class="sm mu num mb10" id="kmCt"></p><div class="cd" id="kmL"></div></section>
 
 </div>
@@ -249,7 +255,7 @@ function lsSet(k,v){try{localStorage.setItem(LS+k,JSON.stringify(v))}catch(e){}}
 var SB_URL='https://owfbvlqwdeaepyxmypcs.supabase.co',SB_KEY='sb_publishable_vNna_F3t5OwWEN6Hyx--Fw_-6mJyR30';
 var SB=window.supabase.createClient(SB_URL,SB_KEY);
 var U=null,UID=null,EMAIL='';
-function freshP(){return{ans:[],ts:{},cases:[],sr:{},td:[],km:[],hist:[],qs:{},day:{d:0,n:0},str:0,ld:'',upd:0}}
+function freshP(){return{ans:[],ts:{},cases:[],sr:{},td:[],km:[],hist:[],qs:{},own:[],day:{d:0,n:0},str:0,ld:'',upd:0}}
 var P=freshP();
 var svTimer=null,svBusy=false,svDirty=false,STORE='konto';
 function save(){P.upd=Date.now();if(UID)lsSet('p_'+UID,P);svDirty=true;if(!svTimer&&!svBusy)svTimer=setTimeout(flush,1500)}
@@ -717,7 +723,7 @@ var CSH=[
 ['Fagprøven','Planlegging, gjennomføring, egenvurdering, dokumentasjon.']
 ];
 
-var FPC='<div class="cd"><p>Fagprøven er praktisk. Prøvenemnda lager oppgaven, ofte knyttet til din egen arbeidsplass, og vurderer fire deler. Fylkeskommunen der du er oppmeldt har egne skjema og tidsrammer, så les informasjonen du får derfra.</p></div>'+
+var FPC='<div class="cd"><p>Offisiell informasjon om den skriftlige eksamenen finner du hos Udir: <a href="https://kandidat.udir.no/eksamensinfo/SIK3103">eksamensinfo for SIK3103</a>.</p></div><div class="cd"><p>Fagprøven er praktisk. Prøvenemnda lager oppgaven, ofte knyttet til din egen arbeidsplass, og vurderer fire deler. Fylkeskommunen der du er oppmeldt har egne skjema og tidsrammer, så les informasjonen du får derfra.</p></div>'+
 '<div class="cd"><h3>1. Planlegging</h3><ul><li>Lag en skriftlig plan med framdrift og tidsbruk</li><li>Begrunn valgene dine faglig</li><li>Ta med HMS, risikovurdering og hvilke hjelpemidler du trenger</li></ul><h3>2. Gjennomføring</h3><ul><li>Gjør arbeidet slik du har planlagt</li><li>Avviker du fra planen, forklar hvorfor</li><li>Vis at du jobber selvstendig, sikkert og med god service</li></ul><h3>3. Egenvurdering</h3><ul><li>Hva gikk bra, og hva ville du gjort annerledes?</li><li>Vær ærlig. Å se egne feil teller positivt</li></ul><h3>4. Dokumentasjon</h3><ul><li>Risikovurdering, instruks, rapporter, skisser</li><li>Bruk fagbegreper riktig</li><li>Ryddig og lett å finne fram i</li></ul></div>'+
 '<div class="cd"><h3>Hva skiller karakterene?</h3><p><strong>Bestått meget godt</strong>: du forstår, vurderer og reflekterer, og jobber selvstendig.</p><p class="mt6"><strong>Bestått</strong>: du kan bruke kunnskapen, gjøre rede for og forklare.</p><p class="mt6"><strong>Ikke bestått</strong>: du gjengir og gjentar, og det avdekkes grunnleggende mangler.</p></div>'+
 '<div class="cd"><h3>Forberedelser</h3><ul><li>Les læreplanen SIK03-02 og huk av målene i denne appen</li><li>Lag en risikovurdering og en enkel beredskapsplan for eget objekt på forhånd, som øving</li><li>Øv på å forklare hvorfor du gjør ting, ikke bare hva</li><li>Ha lovene tilgjengelig og vit hvor du finner fram</li><li>Regn med en fagsamtale der nemnda spør om valgene dine</li></ul></div>';
@@ -752,7 +758,7 @@ function go(s){
   var top={opps:'mer',fagp:'mer',komp:'mer',vilkar:'mer'}[s]||s;
   var nis=document.querySelectorAll('.ni');for(var j=0;j<nis.length;j++)nis[j].classList.toggle('on',nis[j].getAttribute('data-s')===top);
   $('ms').scrollTop=0;
-  if(s==='hjem')rHome();if(s==='exam')resetE();if(s==='score')rScore();if(s==='kort')srStart();if(s==='lar')clT();if(s==='mer')rMer();
+  if(s==='hjem')rHome();if(s==='exam')resetE();if(s==='score')rScore();if(s==='kort')srStart();if(s==='lar')clT();if(s==='mer')rMer();if(s==='fagp')rOwn();
 }
 
 /* ---------- hjem ---------- */
@@ -790,6 +796,7 @@ function quickQ(id){go('exam');$('eTyp').value='multi';$('eCnt').value='10';$('e
 /* ---------- eksamen ---------- */
 var eTmr=null;
 function resetE(){if(eTmr){clearInterval(eTmr);eTmr=null}$('eSet').style.display='';$('eAct').style.display='none';$('eRes').style.display='none';$('aiCaseMsg').textContent='';$('eMsg').textContent=pro()?'':'Gratis: bare flervalg, '+Math.max(0,10-dayN())+' spørsmål igjen i dag.'}
+function preset(){var m=$('eMode').value;if(m==='kurs'){$('eTyp').value='multi';$('eCnt').value='80';$('eTpc').value='all';$('eTim').value='120'}else if(m==='eks'){$('eTyp').value='case';$('eCnt').value='5';$('eTim').value='0'}}
 function stedTxt(wp,sted){return sted?esc(sted):WP[wp][1]}
 function casePool(wp){return CS.filter(function(c){return c.w===wp||c.w==='alle'})}
 function mkMC(q){var o=shuffle([{t:q[2],ok:1},{t:q[3],ok:0},{t:q[4],ok:0},{t:q[5],ok:0}]);return{k:'mc',id:qid(q[1]),tp:q[0],q:q[1],o:o,e:q[6]}}
@@ -820,7 +827,7 @@ function showQ(){
   if(q.k==='mc'){
     $('eQ').innerHTML='<div class="cd"><span class="bg bgA">'+TN[q.tp]+'</span><h3 class="mt10 mb10">'+esc(q.q)+'</h3>'+q.o.map(function(o,i){return '<button class="ob" onclick="ansM('+i+')">'+esc(o.t)+'</button>'}).join('')+'<div id="eExp"></div></div>';
   }else{
-    $('eQ').innerHTML='<div class="cd"><span class="bg bgW">Caseoppgave'+(q.ai?' · laget av AI':'')+'</span><h3 class="mt10">'+esc(q.t)+'</h3><div class="cb">'+q.s+'</div><ol>'+q.tk.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ol>'+
+    $('eQ').innerHTML='<div class="cd"><span class="bg bgW">'+(q.lab||'Caseoppgave')+(q.ai?' · laget av AI':'')+'</span><h3 class="mt10">'+esc(q.t)+'</h3><div class="cb">'+q.s+'</div><ol>'+q.tk.map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+'</ol>'+
     '<div class="fg mt10"><label for="cAns">Svaret ditt</label><textarea id="cAns" placeholder="Skriv som på eksamen: hva du gjør, i hvilken rekkefølge, og hvorfor. Bruk fagbegreper og vis til hjemler."></textarea></div>'+
     '<div class="row"><button class="btn bp ai-only" id="cAiBtn" onclick="gradeAI()" style="display:'+(AI?'':'none')+'">Få AI-vurdering</button><button class="btn bo" onclick="gradeSelf()">Vis fasitpunkter og vurder selv</button></div><p class="sm mu mt6" id="cMsg"></p><div id="cOut"></div></div>';
   }
@@ -891,18 +898,50 @@ function showRes(){
 function endE(){if(E&&(E.mcN||E.cs.length))showRes();else resetE()}
 function bar(label,val,p){var col=p>=70?'var(--ok)':p>=50?'var(--wn)':'var(--err)';return '<div class="sbar"><div class="sbl"><span>'+label+'</span><span class="num">'+val+'</span></div><div class="pb"><div class="pf" style="width:'+p+'%;background:'+col+'"></div></div></div>'}
 
+/* ---------- fagsamtale og egne spørsmål ---------- */
+var WTK=['Svar slik du ville gjort i fagsamtalen: forklar hvorfor, ikke bare hva.','Bruk fagbegreper, og knytt svaret til din egen arbeidsplass.'];
+var WHYW={
+tog:{t:'Hvorfor billettkontroll?',s:'Hvorfor har selskapet billettkontroll på {sted}? Hva skal kontrollen oppnå?',pts:['Sikrer billettinntektene som er med på å betale for tilbudet','Rettferdighet overfor dem som betaler','Virker forebyggende: risikoen for å bli kontrollert gjør at flere kjøper billett','Synlig personale gir tryggere reise og er et tiltak mot uro og hærverk','Grunnlaget ligger i transportvilkårene og i jernbaneloven og yrkestransportloven','Kontrollen er også service: informasjon og hjelp til reisende','Tall fra kontrollene brukes til å planlegge hvor og når det kontrolleres']},
+kjopesenter:{t:'Hvorfor sentervekter?',s:'Hvorfor har senterledelsen vektere på {sted}? Hva skal tjenesten oppnå?',pts:['Verdiene som beskyttes: kunder, ansatte, varer, bygg og omdømme','Uønskede hendelser som er aktuelle: tyveri, uro, brann, sykdom og ulykker','Vaktholdet er et tiltak som følger av senterets risikovurdering','Synlig tilstedeværelse virker forebyggende','Vekteren er en del av beredskapen: brann, evakuering og førstehjelp','Service og trygghet gjør at kunder trives og kommer tilbake','Grunnlaget er eierens råderett, tjenesteinstruksen og vaktvirksomhetsloven']}
+};
+var WHY=[
+{t:'Hvorfor vakthold her?',s:'Hvorfor har oppdragsgiveren vakthold på {sted}? Hva skal tjenesten oppnå?',pts:['Hvilke verdier som skal beskyttes: mennesker, materiell, informasjon, omdømme','Hvilke uønskede hendelser som er aktuelle akkurat her','Tjenesten er et tiltak som følger av en risikovurdering','Forskjellen på det forebyggende og det konsekvensreduserende i tjenesten','Synlig tilstedeværelse og service som del av oppdraget','Kontrakt og tjenesteinstruks styrer hva som leveres','Grunnlaget i eierens råderett og vaktvirksomhetsloven']},
+{t:'Risikovurdering av eget objekt',s:'Lag en enkel risikovurdering for {sted}: velg tre uønskede hendelser, vurder sannsynlighet og konsekvens, og foreslå tiltak.',pts:['Avgrenser objektet og sier hvilke verdier som skal beskyttes','Tre hendelser som er relevante for stedet','Begrunner sannsynlighet og konsekvens for hver','Prioriterer, for eksempel med risikomatrise','Foreslår både forebyggende og konsekvensreduserende tiltak','Nevner restrisiko og hvem som må godta den','Sier hvordan tiltakene følges opp']},
+{t:'Hvorfor denne rutinen?',s:'Velg en rutine du gjør hver vakt på {sted}, for eksempel en runde, en kontroll eller loggføring. Hvorfor gjøres den akkurat slik?',pts:['Hvilken risiko rutinen skal redusere','At den er forankret i tjenesteinstruksen','Hva som kan skje hvis den droppes eller gjøres slurvete','Hvordan den dokumenteres','At avvik du finner, meldes','Et eget forslag til forbedring']},
+{t:'Hvorfor rapport?',s:'Hvorfor skriver du rapport etter en hendelse på {sted}, og hva brukes den til?',pts:['Dokumenterer hva som skjedde for oppdragsgiver og leder','Kan bli bevis for politi og retten','Gir grunnlag for å rette avvik og forebygge at det skjer igjen','Beskytter deg selv hvis det kommer klager','Hvem, hva, hvor, når, hvordan og vitner','Skiller observasjon fra vurdering og skrives raskt etter hendelsen']},
+{t:'Hvorfor minst mulig makt?',s:'Hvorfor skal du løse situasjoner på {sted} med minst mulig inngrep?',pts:['Vektere har ikke politimyndighet','Maktbruk krever hjemmel: nødverge, nødrett eller lovlig pågripelse','Minste inngreps prinsipp og forholdsmessighet','Dialog gir oftest bedre resultat og mindre skade','Egensikkerhet: maktbruk øker risikoen for deg selv','Tillit og omdømme for oppdragsgiver og bransjen','At du selv kan bli straffet hvis du går for langt']},
+{t:'HMS i egen jobb',s:'Hvilke HMS-risikoer har du selv på {sted}, og hvordan håndteres de?',pts:['Konkrete risikoer, for eksempel vold og trusler, alenearbeid, nattarbeid eller trafikk','Arbeidsgivers ansvar og din egen medvirkningsplikt','Tiltak som samband, innmeldingsrutiner og opplæring','At hendelser og nestenulykker meldes som avvik','Verneombudets rolle','Oppfølging etter alvorlige hendelser']},
+{t:'Når instruksen ikke passer',s:'Hva gjør du hvis tjenesteinstruksen for {sted} ikke passer til situasjonen du står i?',pts:['Liv og helse går først','Loven står over instruksen','Kontakter leder eller oppdragsgiver når det er mulig','Begrunner hvorfor du avviker','Dokumenterer i rapport','Foreslår endring av instruksen etterpå']},
+{t:'Service og sikkerhet',s:'Hvordan gir du god service på {sted} uten at det går ut over sikkerheten?',pts:['Service gir kontakt og informasjon som hjelper sikkerhetsarbeidet','Tilpasser deg den du møter','Likebehandling','Sier vennlig nei når noe bryter med instruks eller sikkerhet','Taushetsplikt om rutiner og personer','Et konkret eksempel fra egen jobb']},
+{t:'Planlegg en øvelse',s:'Planlegg en beredskapsøvelse for {sted}.',pts:['Mål for øvelsen','Scenario hentet fra risikovurderingen','Valg av øvelsestype og hvorfor','Roller og hvem som deltar','Gjennomføring og sikkerhet under øvelsen','Evaluering','Oppdatering av beredskapsplanen etterpå']},
+{t:'Egenvurdering',s:'Tenk på en hendelse du har vært med på i jobben. Hva gikk bra, og hva ville du gjort annerledes?',pts:['Beskriver hendelsen saklig og kort','Peker på noe som gikk bra og hvorfor','Peker på noe som kunne vært bedre','Knytter vurderingen til fag: hjemler, rutiner, kommunikasjon','Sier hva du har lært og hva du gjør neste gang']}
+];
+function startWhy(){
+  if(!pro()){$('whyMsg').textContent='Fagsamtale-trening er en del av Pro.';return}
+  var wp=U.wp,sted=U.sted,l=shuffle(WHY);if(WHYW[wp])l=[WHYW[wp]].concat(l.filter(function(x){return x!==WHY[0]}));
+  var items=l.slice(0,5).map(function(c){return{k:'case',lab:'Fagsamtale',t:c.t,s:c.s.replace('{sted}',stedTxt(wp,sted)),tk:WTK,pts:c.pts}});
+  go('exam');beginE(items,0,'Fagsamtale');
+}
+function rOwn(){var box=$('ownL');box.innerHTML='';(P.own||[]).forEach(function(o){var b=document.createElement('button');b.className='btn bo bs';b.textContent='Slett';b.onclick=function(){P.own=P.own.filter(function(x){return x.id!==o.id});delete P.sr['own:'+o.id];save();rOwn();rDeckSel()};box.appendChild(mkRow(o.q,b))});$('whyMsg').textContent=''}
+function ownAdd(){var q=$('ownQ').value.trim(),a=$('ownA').value.trim();if(q.length<5||a.length<5){$('ownMsg').textContent='Skriv både spørsmål og svar.';return}
+  if(!P.own)P.own=[];if(P.own.length>=200){$('ownMsg').textContent='Du kan ha 200 egne spørsmål.';return}
+  P.own.push({id:Date.now().toString(36),q:q.slice(0,300),a:a.slice(0,2000)});save();$('ownQ').value='';$('ownA').value='';$('ownMsg').textContent='Lagret.';rOwn();rDeckSel()}
+function ownPractice(){if(!(P.own||[]).length){$('ownMsg').textContent='Lag minst ett spørsmål først.';return}go('kort');rDeckSel();$('fDeck').value='Egne spørsmål';srStart()}
+
 /* ---------- flashcards med repetisjon ---------- */
 var IV=[1,2,3,5,8];
 var DECK=FC.map(function(f){return{id:f[1],c:f[0],q:f[1],a:f[2]}}).concat(GL.map(function(g){return{id:'gl:'+g[1],c:'Ordbok: '+g[0],q:'Hva betyr «'+g[1]+'»?',a:g[2]}}));
 var S={q:[],tot:0,done:0,flip:false};
+function allDeck(){return DECK.concat((P.own||[]).map(function(o){return{id:'own:'+o.id,c:'Egne spørsmål',q:o.q,a:o.a}}))}
 function inDeck(c,cat){return cat==='all'||c.c===cat||(cat==='ordbok'&&c.c.indexOf('Ordbok')===0)||(cat==='kjerne'&&c.c.indexOf('Ordbok')!==0)}
-function srCounts(cat){var t=today(),r={due:0,nw:0,kn:0,tot:0};DECK.forEach(function(c){if(!inDeck(c,cat))return;r.tot++;var s=P.sr[c.id];if(!s)r.nw++;else if(s.due<=t)r.due++;else r.kn++});return r}
+function srCounts(cat){var t=today(),r={due:0,nw:0,kn:0,tot:0};allDeck().forEach(function(c){if(!inDeck(c,cat))return;r.tot++;var s=P.sr[c.id];if(!s)r.nw++;else if(s.due<=t)r.due++;else r.kn++});return r}
 function srGot(){var n=0;DECK.forEach(function(c){var s=P.sr[c.id];if(s&&s.b>=1)n++});return n}
 function srKnown(){var n=0;DECK.forEach(function(c){var s=P.sr[c.id];if(s&&s.b>=2)n++});return n}
-function rDeckSel(){if(!pro()){$('fDeck').innerHTML='<option value="kjerne">Kjernestoff (gratis)</option>';return}var cats=[];FC.forEach(function(f){if(cats.indexOf(f[0])<0)cats.push(f[0])});
+function rDeckSel(){rDeckSel0();if((P.own||[]).length){var o=document.createElement('option');o.value='Egne spørsmål';o.textContent='Egne spørsmål';$('fDeck').appendChild(o)}}
+function rDeckSel0(){if(!pro()){$('fDeck').innerHTML='<option value="kjerne">Kjernestoff (gratis)</option>';return}var cats=[];FC.forEach(function(f){if(cats.indexOf(f[0])<0)cats.push(f[0])});
   $('fDeck').innerHTML='<option value="all">Alle kort: forfalte + 20 nye</option><option value="kjerne">Kjernestoff</option><option value="ordbok">Fagordbok</option>'+cats.map(function(c){return '<option value="'+c+'">'+c+'</option>'}).join('')}
 function srStart(){
-  var cat=$('fDeck').value,t=today();var pool=DECK.filter(function(c){return inDeck(c,cat)});
+  var cat=$('fDeck').value,t=today();var pool=allDeck().filter(function(c){return inDeck(c,cat)});
   var due=shuffle(pool.filter(function(c){return P.sr[c.id]&&P.sr[c.id].due<=t}));
   var nw=shuffle(pool.filter(function(c){return !P.sr[c.id]})).slice(0,20);
   S.q=due.concat(nw);S.tot=S.q.length;S.done=0;S.flip=false;srShow();
